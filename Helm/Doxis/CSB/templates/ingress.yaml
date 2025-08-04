@@ -4,7 +4,7 @@ metadata:
   name: public-alb-ingress
   namespace: {{ .Release.Namespace }}
   annotations:
-    # Placeholders for AWS ALB Ingress Controller annotations
+    # Placeholders for AWS Application Load Balancer Ingress Controller annotations
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
     alb.ingress.kubernetes.io/target-type: ip
