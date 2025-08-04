@@ -94,3 +94,13 @@ spec:
             port:
               name: http
       {{- end }}
+      {{- $tmp = index .Values "doxis-admin" }}
+      {{- if $tmp.enabled }}
+      - path: /admin
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: admin
+            port:
+              name: http
+      {{- end }}
