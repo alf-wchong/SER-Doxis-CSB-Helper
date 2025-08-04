@@ -1,0 +1,184 @@
+hostname: "<domainName>"
+
+# Placeholder for AWS IAM Role ARN for IRSA mapped to Kubernetes service account
+aws:
+  irsaIamRoleArn: "<IAM_ROLE_ARN_FOR_SERVICE_ACCOUNT>"
+
+doxis-webcube:
+  enabled: true
+  fullnameOverride: "webcube"
+  webcube:
+    log: "STDOUT"
+    image:
+      repository: "swtdocker.sst-docker-hub/doxis4-webcube/ubuntu/dx4-webcube/14.1.1"
+      tag: "latest"
+      pullPolicy: "Always"
+
+doxis-business-studio:
+  enabled: true
+  fullnameOverride: "businessstudio"
+  businessstudio:
+    instancesConfig:
+      instances:
+      - host: "csb"
+        port: 8080
+        ssl: false
+        domains:
+        - "sergroup.com"
+        tenants: []
+    log: "STDOUT"
+    image:
+      repository: "swtdocker.sst-docker-hub/doxis-businessstudio/ubuntu/dx4-businessstudio/14.1.1"
+      tag: "latest"
+      pullPolicy: "Always"
+
+doxis-storage:
+  enabled: true
+  replicaCount: 1
+  fullnameOverride: "storage"
+  storage:
+    log: "STDOUT"
+    image:
+      repository: "swtdocker.sst-docker-hub/doxis4-csb/ubuntu/dx4-storage/14.2.0"
+      tag: "latest"
+      pullPolicy: "Always"
+
+doxis-admin:
+  enabled: true
+  fullnameOverride: "admin"
+  admin:
+    internalUser:
+      enabled: true
+    log: "STDOUT"
+    db:
+      host: "<AWS_RDS_POSTGRES_HOST>"
+      port: "<AWS_RDS_POSTGRES_PORT>"
+      type: "pgsql"
+      name: "dx4_admin"
+      user: "<AWS_RDS_POSTGRES_USER>"
+      password: "<AWS_RDS_POSTGRES_PASSWORD>"
+      encrypt: false
+    image:
+      repository: "swtdocker.sst-docker-hub/doxis4-csb/ubuntu/dx4-admin/14.2.0"
+      tag: "latest"
+      pullPolicy: "Always"
+
+doxis-csb:
+  enabled: true
+  replicaCount: 1
+  fullnameOverride: "csb"
+  scheduledRestarts:
+    enabled: false
+  csb:
+    db:
+      host: "<AWS_RDS_POSTGRES_HOST>"
+      port: "<AWS_RDS_POSTGRES_PORT>"
+      type: "pgsql"
+      encrypt: false
+      nchar: false
+    organizations:
+    - db:
+        name: "dx4_man01"
+        user: "<AWS_RDS_POSTGRES_USER>"
+        password: "<AWS_RDS_POSTGRES_PASSWORD>"
+    - db:
+        name: "dx4_man02"
+        user: "<AWS_RDS_POSTGRES_USER>"
+        password: "<AWS_RDS_POSTGRES_PASSWORD>"
+    log: "STDOUT"
+    image:
+      repository: "swtdocker.sst-docker-hub/doxis4-csb/ubuntu/dx4-csb/14.2.0"
+      tag: "latest"
+      pullPolicy: "Always"
+
+doxis-agent:
+  enabled: true
+  replicaCount: 1
+  fullnameOverride: "agent"
+  csb:
+    host: "csb"
+    port: 8080
+    useSSL: false
+  agent:
+    internalUser:
+      enabled: true
+    log: "STDOUT"
+    organizations:
+    - name: "DX4"
+      role: "admins"
+  scheduledRestarts:
+    enabled: false
+  image:
+    repository: "swtdocker.sst-docker-hub/doxis4-csb/ubuntu/dx4-agent/14.2.0"
+    tag: "latest"
+    pullPolicy: "Always"
+
+doxis-fulltext:
+  enabled: true
+  fullnameOverride: "fulltext"
+  image:
+    repository: "swtdocker.sst-docker-hub/doxis4-csb/ubuntu/dx4-fulltext/14.2.0"
+    tag: "latest"
+    pullPolicy: "Always"
+  fulltext:
+    internalUser:
+      enabled: true
+    log: "STDOUT"
+    # Amazon OpenSearch Endpoint config instead of local ES/opensearch pods
+    amazonOpenSearch:
+      endpoint: "<AMAZON_OPENSEARCH_ENDPOINT>"
+      region: "<AWS_REGION>"
+      useIAMAuth: true
+      irsaIamRoleArn: "<IAM_ROLE_ARN_FOR_SERVICE_ACCOUNT>"
+
+tika:
+  enabled: true
+  csb:
+    host: "csb"
+    port: 8080
+
+doxis-fips:
+  enabled: true
+  fullnameOverride: "fips"
+  image:
+    repository: "swtdocker.sst-docker-hub/doxis4-csb/ubuntu/dx4-fips/14.2.0"
+    tag: "latest"
+    pullPolicy: "Always"
+  replicaCount: 1
+  csb:
+    host: "csb"
+    port: 8080
+    ssl: false
+  fips:
+    internalUser:
+      enabled: true
+    db:
+      type: "pgsql"
+      host: "<AWS_RDS_POSTGRES_HOST>"
+      port: "<AWS_RDS_POSTGRES_PORT>"
+      name: "dx4_fips"
+      user: "<AWS_RDS_POSTGRES_USER>"
+      password: "<AWS_RDS_POSTGRES_PASSWORD>"
+      encrypt: false
+  s3:
+    enabled: true
+    bucketName: "<AWS_S3_BUCKET_NAME>"
+    bucketRegion: "<AWS_S3_BUCKET_REGION>"
+    accessKeyId: ""
+    secretAccessKey: ""
+  log: "STDOUT"
+
+doxis-mobilecube:
+  enabled: true
+  fullnameOverride: "mobilecube"
+  image:
+    repository: "swtdocker.sst-docker-hub/doxis4-mobilecube/ubuntu/dx4-mobilecube/14.1.3/snapshot"
+    tag: "latest"
+    pullPolicy: "Always"
+  mobilecube:
+    log: "STDOUT"
+    csb:
+      host: "csb"
+      port: "8080"
+      https: false
+      tenant: "DX4"
