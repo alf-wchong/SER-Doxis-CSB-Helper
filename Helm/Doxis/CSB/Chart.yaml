@@ -1,0 +1,43 @@
+apiVersion: v2
+name: doxis
+description: A Helm chart to deploy Doxis CSB in Amazon EKS
+type: application
+version: 0.1.0
+appVersion: "14.0.0"
+dependencies:
+- name: "doxis-csb"
+  version: "30.0.0"
+  repository: "@dx4charts"
+  condition: doxis-csb.enabled
+- name: "doxis-admin"
+  version: "30.0.0"
+  repository: "@dx4charts"
+  condition: doxis-admin.enabled
+- name: "doxis-storage"
+  version: "30.0.0-beta-TCO-1546"
+  repository: "@dx4charts"
+  condition: doxis-storage.enabled
+- name: "doxis-agent"
+  version: "30.0.0-beta-TCO-1546"
+  repository: "@dx4charts"
+  condition: doxis-agent.enabled
+- name: "doxis-fulltext"
+  version: "30.0.0-beta-TCO-1546"
+  repository: "@dx4charts"
+  condition: doxis-fulltext.enabled
+- name: "doxis-fips"
+  version: "30.0.0-beta-TCO-1546"
+  repository: "@dx4charts"
+  condition: doxis-fips.enabled
+- name: "doxis-business-studio"
+  version: "30.0.0-beta-TCO-1546"
+  repository: "@dx4charts"
+  condition: doxis-business-studio.enabled
+- name: "doxis-mobilecube"
+  version: "30.0.0-beta-TCO-1546"
+  repository: "@dx4charts"
+  condition: doxis-mobilecube.enabled
+- name: "doxis-webcube"
+  version: "30.0.0-beta-TCO-1546"
+  repository: "@dx4charts"
+  condition: doxis-webcube.enabled
