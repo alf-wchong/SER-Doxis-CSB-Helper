@@ -1,0 +1,96 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: public-alb-ingress
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    # Placeholders for AWS ALB Ingress Controller annotations
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/certificate-arn: "<YOUR_ACM_CERTIFICATE_ARN>"
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+spec:
+  rules:
+  - host: {{ .Values.hostname }}
+    http:
+      paths:
+      {{- $tmp := index .Values "doxis-csb" }}
+      {{- if $tmp.enabled }}
+      - path: /sedna-transfer-service-xf
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: csb
+            port:
+              name: http
+      - path: /restws
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: csb
+            port:
+              name: http
+      - path: /sedna-tools
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: csb
+            port:
+              name: http
+      - path: /ml-admin
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: csb
+            port:
+              name: http
+      - path: /sedna-info-webapp
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: csb
+            port:
+              name: http
+      {{- end }}
+      {{- $tmp = index .Values "doxis-storage" }}
+      {{- if $tmp.enabled }}
+      - path: /storagesystem
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: storage
+            port:
+              name: http
+      {{- end }}
+      {{- $tmp = index .Values "doxis-business-studio" }}
+      {{- if $tmp.enabled }}
+      - path: /businessstudio
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: businessstudio
+            port:
+              name: http
+      {{- end }}
+      {{- $tmp = index .Values "doxis-webcube" }}
+      {{- if $tmp.enabled }}
+      - path: /webcube
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: webcube
+            port:
+              name: http
+      {{- end }}
+      {{- $tmp = index .Values "doxis-mobilecube" }}
+      {{- if $tmp.enabled }}
+      - path: /mobilecube
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: mobilecube
+            port:
+              name: http
+      {{- end }}
