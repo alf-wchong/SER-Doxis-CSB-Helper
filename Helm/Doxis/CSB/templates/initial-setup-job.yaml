@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ include "doxis.fullname" . }}-initial-config"
+  labels:
+    app.kubernetes.io/name: {{ include "doxis.name" . }}
+    helm.sh/chart: {{ include "doxis.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: initial-config
+          image: "{{ .Values.global.imageRegistry }}/<your-initializer-image:tag>"
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "<sh /createCSB.sh>"]
+          env:
+            - name: EXAMPLE_ENV
+              value: "put your values YAML variable reference here"
+      # Optionally mount secrets, configMaps, or volumes as required
