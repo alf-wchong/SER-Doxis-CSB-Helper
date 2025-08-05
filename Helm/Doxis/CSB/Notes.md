@@ -1,4 +1,4 @@
-Look at [initial-setup-job.yaml](CSB/templates/initial-setup-job.yaml)
+Look at [initial-setup-job.yaml](templates/initial-setup-job.yaml)
 
 Rather than within the admin pod, use the k8s job to connect to the adminPod. Then in the job, for the createDomain script to be effective, the env var DX4_KUBERNETES_AUTO_DETECTION should be set to true
 env:
