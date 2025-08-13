@@ -1,0 +1,34 @@
+# PostgreSQL Database and User Setup
+
+This script automates the creation of a PostgreSQL database, a dedicated user, and a schema with the correct permissions. This ensures the `fips` user has full control over the `fips` database and schema.
+
+**Note:** Remember to replace `'your_secure_password'` with a strong, unique password.
+
+```sql
+-- Step 1: Create the new database named 'fips'.
+-- The owner will be set to 'postgres' initially, but we'll change it later.
+CREATE DATABASE fips;
+
+-- Step 2: Create the new user 'fips' with a password.
+-- !!! IMPORTANT: Replace 'your_secure_password' with a strong, secure password.
+CREATE USER fips WITH PASSWORD 'your_secure_password';
+
+-- Step 3: Grant all privileges on the 'fips' database to the 'fips' user.
+-- This gives the user full control over the database.
+GRANT ALL PRIVILEGES ON DATABASE fips TO fips;
+
+-- Step 4: Change the ownership of the 'fips' database to the 'fips' user.
+-- This makes 'fips' the official owner.
+ALTER DATABASE fips OWNER TO fips;
+
+-- Step 5: Connect to the new 'fips' database to create the schema within it.
+-- This command is not part of the script, but a necessary step for the next command.
+-- In psql, you would run: \c fips
+
+-- Step 6: Create the 'fips' schema and authorize the 'fips' user as its owner.
+-- The AUTHORIZATION clause automatically grants the 'fips' user full privileges on the schema.
+CREATE SCHEMA fips AUTHORIZATION fips;
+
+-- Step 7: (Optional but good practice) Explicitly grant all privileges on the schema to the user.
+-- This reinforces the permissions granted by the AUTHORIZATION clause.
+GRANT ALL PRIVILEGES ON SCHEMA fips TO fips;
