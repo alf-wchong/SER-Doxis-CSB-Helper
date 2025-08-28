@@ -123,12 +123,13 @@ doxis-fulltext:
     internalUser:
       enabled: true
     log: "STDOUT"
-    amazonOpenSearch:
-      endpoint: "<AMAZON_OPENSEARCH_ENDPOINT>"
-      region: "<AWS_REGION>"
-      useIAMAuth: true
-      irsaIamRoleArn: "<IAM_ROLE_ARN_FOR_SERVICE_ACCOUNT>"
-
+    serviceAccount:
+      name: "<IAM_ROLE_ARN_FOR_SERVICE_ACCOUNT>"
+    extraEnvVars:
+      - name: AOSS_ENDPOINT
+        value: "https://<your-collection-id>.<region>.aoss.amazonaws.com"
+      - name: AWS_REGION
+        value: "<region>"
 tika:
   enabled: true
   csb:
