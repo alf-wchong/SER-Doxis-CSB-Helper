@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<orga>
+  <!-- Source system: LDAP -->
+  <source>
+    <ldap:ldap xmlns:ldap="http://de.ser.doxis4/orgatransmitter/ldap" version="3.0">
+      <ldap:server>ad01.corp.example.com</ldap:server>
+      <ldap:port>3268</ldap:port>
+      <ldap:base_dn>dc=corp,dc=example,dc=com</ldap:base_dn>
+      <ldap:login>cn=svc_orgasync,ou=Service Accounts,dc=corp,dc=example,dc=com</ldap:login>
+      <ldap:password>REPLACE_WITH_PASSWORD_OR_ENCRYPTED_VALUE</ldap:password>
+      <ldap:use_ssl>false</ldap:use_ssl>
+      <ldap:ldap_controls>true</ldap:ldap_controls>
+      <ldap:global_catalog>true</ldap:global_catalog>
+    </ldap:ldap>
+  </source>
+  <!-- LDAP parameters/elements shown in OrgaTransmitter’s “LDAP source server definition” example. :contentReference[oaicite:0]{index=0} -->
+
+  <!-- Target system: Doxis CSB -->
+  <destination>
+    <csb:csb xmlns:csb="http://de.ser.doxis4/orgatransmitter/csb">
+      <csb:host>csb01.corp.example.com</csb:host>
+      <csb:port>443</csb:port>
+      <csb:customer>CUST_001</csb:customer>
+      <csb:organization>ACME</csb:organization>
+
+      <!-- If you use the dedicated OrgaTransmitterService account: -->
+      <csb:username>OrgaTransmitterService</csb:username>
+      <csb:password_encrypted>true</csb:password_encrypted>
+      <csb:password>REPLACE_WITH_ENCRYPTED_PASSWORD</csb:password>
+
+      <!-- Alternative auth (if used in your setup):
+      <csb:access_token>REPLACE_WITH_TOKEN</csb:access_token>
+      -->
+    </csb:csb>
+  </destination>
+  <!-- CSB connection elements (host/port/customer/organization + OrgaTransmitterService + encrypted password) as described in the CSB target config section. :contentReference[oaicite:1]{index=1} -->
+
+  <!-- Mapping: synchronize users from LDAP into CSB -->
+  <mapping>
+    <!-- Example user mapping pattern (LDAP/AD) incl. movement tracker. :contentReference[oaicite:2]{index=2} -->
+    <user ldap_object="user" movement_tracker="objectGUID" filter="(&(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))">
+      <login>
+        <attribute>sAMAccountName</attribute>
+      </login>
+      <first_name>
+        <attribute>givenName</attribute>
+      </first_name>
+      <last_name>
+        <attribute>sn</attribute>
+      </last_name>
+      <mail_address>
+        <attribute>mail</attribute>
+      </mail_address>
+      <description>
+        <attribute>description</attribute>
+      </description>
+
+      <!-- Optional: set authentication policy explicitly in CSB; example values shown in the guide. :contentReference[oaicite:3]{index=3} -->
+      <authentication>
+        <fixed>CRED_PASSWORD</fixed>
+      </authentication>
+
+      <!-- Optional: set license type (example values shown in the guide). :contentReference[oaicite:4]{index=4} -->
+      <license_type>
+        <fixed>CONCURRENT</fixed>
+      </license_type>
+
+      <!-- Optional: mark user locked based on an LDAP attribute -->
+      <locked>
+        <attribute>UserIsInactive</attribute>
+      </locked>
+
+      <!-- Optional: photo sync if your LDAP stores thumbnailPhoto -->
+      <!-- :contentReference[oaicite:5]{index=5} -->
+      <!--
+      <photo>
+        <attribute>thumbnailPhoto</attribute>
+      </photo>
+      -->
+    </user>
+  </mapping>
+</orga>
