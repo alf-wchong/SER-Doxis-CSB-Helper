@@ -246,7 +246,7 @@ sequenceDiagram
 
 ---
 
-## Swimlane / Process Flow Diagram (Mermaid)
+## Swimlane / Process Flow Diagram (End to End)
 ```mermaid
 sequenceDiagram
   autonumber
