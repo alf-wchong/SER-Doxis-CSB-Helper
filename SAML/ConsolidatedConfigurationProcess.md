@@ -68,10 +68,7 @@ Assertion Consumer Service (ACS):
 3. Ensure the Okta authentication policy for this application is **passwordless**
    (for example: FIDO2, magic link, device-based authentication).
 4. Download the **Identity Provider (IdP) metadata XML** from Okta.
-5. Save the file locally as:
-
-    <OKTA_IDP_METADATA_XML>
-
+5. Save the file locally as: *<OKTA_IDP_METADATA_XML>*
 ---
 
 ## Step 2 — Log in to CSB using CSBCMD
@@ -191,15 +188,13 @@ Important:
 ## Step 9 — End-user Login Flow (Passwordless)
 **Components: webCube → Okta → webCube → CSB**
 
-1. User opens:
-
-    <WEBCUBE_BASE_URL>
+1. User opens: *<WEBCUBE_BASE_URL>*
 
 2. User selects **Log on with SAML**.
 3. Browser is redirected to Okta.
 4. Okta performs passwordless authentication.
 5. Okta sends a SAML response:
-   - Email address is provided as NameID.
+   - Email address is provided as __NameID__.
 6. webCube receives the assertion at the ACS endpoint.
 7. webCube forwards the assertion to CSB.
 8. CSB validates the assertion and logs the user in.
