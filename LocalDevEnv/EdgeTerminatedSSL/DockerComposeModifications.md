@@ -68,7 +68,7 @@ Docker backend network
   ```
   /etc/letsencrypt
   ```
-  * If you need a guide to get a free public certificate, follow this [guide](../../../FreePublicCert.md) and when done, return to this point and resume.
+  * If you need a guide to get a free public certificate, follow this [guide](../../FreePublicCert.md) and when done, return to this point and resume.
 ---
 
 # Docker Compose Configuration
