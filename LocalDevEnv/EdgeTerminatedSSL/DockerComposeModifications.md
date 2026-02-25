@@ -103,6 +103,10 @@ flowchart TB
   /etc/letsencrypt
   ```
   * If you need a guide to get a free public certificate, follow this [guide](../../FreePublicCert.md) and when done, return to this point and resume.
+    * The guide does not tell you to restart NGINX when the certificates are renewed. You can set up your environment to auto restart NGINX everytime [`certbot` renews the certificate with](../../FreePublicCert.md#8%EF%B8%8F%E2%83%A3-automatic-renewal)
+       ```bash
+       certbot renew --quiet --deploy-hook "docker compose restart nginx"
+       ```         
 ---
 
 # Docker Compose Configuration
