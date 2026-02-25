@@ -88,13 +88,13 @@ flowchart TB
 * Local access via Windows `hosts` file:
 
   ```
-  127.0.0.1 csb.***REMOVED***.duckdns.org
-  127.0.0.1 admin.***REMOVED***.duckdns.org
-  127.0.0.1 agent.***REMOVED***.duckdns.org
-  127.0.0.1 storage.***REMOVED***.duckdns.org
-  127.0.0.1 fulltext.***REMOVED***.duckdns.org
-  127.0.0.1 pgadmin.***REMOVED***.duckdns.org
-  127.0.0.1 cerebro.***REMOVED***.duckdns.org
+  127.0.0.1 csb.dx4localdev.duckdns.org
+  127.0.0.1 admin.dx4localdev.duckdns.org
+  127.0.0.1 agent.dx4localdev.duckdns.org
+  127.0.0.1 storage.dx4localdev.duckdns.org
+  127.0.0.1 fulltext.dx4localdev.duckdns.org
+  127.0.0.1 pgadmin.dx4localdev.duckdns.org
+  127.0.0.1 cerebro.dx4localdev.duckdns.org
   ```
 
 * TLS certificates mounted from:
@@ -267,7 +267,7 @@ services:
     container_name: dx4-pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@***REMOVED***.duckdns.org
+      PGADMIN_DEFAULT_EMAIL: admin@dx4localdev.duckdns.org
       PGADMIN_DEFAULT_PASSWORD: ppp
       PGADMIN_CONFIG_PROXY_X_FOR_COUNT: '1'
       PGADMIN_CONFIG_PROXY_X_PROTO_COUNT: '1'
@@ -333,10 +333,10 @@ Example pattern:
 ```nginx
 server {
     listen 443 ssl;
-    server_name admin.***REMOVED***.duckdns.org;
+    server_name admin.dx4localdev.duckdns.org;
 
-    ssl_certificate     /etc/letsencrypt/live/***REMOVED***.duckdns.org/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/***REMOVED***.duckdns.org/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/dx4localdev.duckdns.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/dx4localdev.duckdns.org/privkey.pem;
 
     proxy_http_version 1.1;
 
