@@ -140,7 +140,8 @@ sudo certbot certonly \
   --preferred-challenges dns \
   --manual-auth-hook ~/duckdns/auth.sh \
   --manual-cleanup-hook ~/duckdns/cleanup.sh \
-  -d YourSubDomain.duckdns.org
+  -d YourSubDomain.duckdns.org \
+  -d '*.YourSubDomain.duckdns.org'
 ```
 
 If successful, you will see:
