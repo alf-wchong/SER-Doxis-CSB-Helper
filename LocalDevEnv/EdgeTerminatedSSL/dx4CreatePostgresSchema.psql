@@ -1,0 +1,101 @@
+/**********************************************************************
+ DX4 PostgreSQL Initialization Script
+ Production-Structured Single Database / Multiple Schemas
+
+ Database: dx4
+ Schemas:
+   - dx4_admin
+   - dx4_man01
+
+ Each schema:
+   - Has matching database user
+   - User owns schema
+   - No superuser privileges
+
+ This script is idempotent (safe to re-run).
+**********************************************************************/
+
+\echo '------------------------------------------------------------'
+\echo 'Creating main DX4 database (if it does not already exist)'
+\echo '------------------------------------------------------------'
+
+DO
+$$
+BEGIN
+    IF NOT EXISTS (
+        SELECT FROM pg_database WHERE datname = 'dx4'
+    ) THEN
+        PERFORM dblink_exec(
+            'dbname=postgres',
+            'CREATE DATABASE dx4
+             WITH ENCODING ''UTF8''
+             TEMPLATE template0'
+        );
+    END IF;
+END
+$$;
+
+\connect dx4
+
+\echo '------------------------------------------------------------'
+\echo 'Configuring deadlock timeout (minimum 30 seconds required)'
+\echo '------------------------------------------------------------'
+
+ALTER DATABASE dx4 SET deadlock_timeout = '30s';
+
+\echo '------------------------------------------------------------'
+\echo 'Creating users'
+\echo '------------------------------------------------------------'
+
+DO
+$$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'dx4_admin') THEN
+        CREATE ROLE dx4_admin LOGIN PASSWORD 'sedna';
+    END IF;
+
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'dx4_man01') THEN
+        CREATE ROLE dx4_man01 LOGIN PASSWORD 'sedna';
+    END IF;
+END
+$$;
+
+\echo '------------------------------------------------------------'
+\echo 'Creating schemas'
+\echo '------------------------------------------------------------'
+
+DO
+$$
+BEGIN
+    IF NOT EXISTS (
+        SELECT FROM information_schema.schemata
+        WHERE schema_name = 'dx4_admin'
+    ) THEN
+        EXECUTE 'CREATE SCHEMA dx4_admin AUTHORIZATION dx4_admin';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT FROM information_schema.schemata
+        WHERE schema_name = 'dx4_man01'
+    ) THEN
+        EXECUTE 'CREATE SCHEMA dx4_man01 AUTHORIZATION dx4_man01';
+    END IF;
+END
+$$;
+
+\echo '------------------------------------------------------------'
+\echo 'Restricting default public schema access'
+\echo '------------------------------------------------------------'
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+
+\echo '------------------------------------------------------------'
+\echo 'Setting search paths'
+\echo '------------------------------------------------------------'
+
+ALTER ROLE dx4_admin SET search_path = dx4_admin;
+ALTER ROLE dx4_man01 SET search_path = dx4_man01;
+
+\echo '------------------------------------------------------------'
+\echo 'DX4 PostgreSQL initialization complete'
+\echo '------------------------------------------------------------'
