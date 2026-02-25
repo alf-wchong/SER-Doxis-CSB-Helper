@@ -292,7 +292,7 @@ services:
     container_name: dx4-pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@***REMOVED***.duckdns.org 
+      PGADMIN_DEFAULT_EMAIL: admin@dx4localdev.duckdns.org 
       PGADMIN_DEFAULT_PASSWORD: ppp
       PGADMIN_CONFIG_PROXY_X_FOR_COUNT: '1'
       PGADMIN_CONFIG_PROXY_X_PROTO_COUNT: '1'
