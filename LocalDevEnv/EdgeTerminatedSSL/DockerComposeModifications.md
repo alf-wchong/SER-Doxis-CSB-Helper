@@ -301,7 +301,7 @@ networks:
 
 # NGINX Configuration
 
-## nginx.conf
+## nginx/nginx.conf
 
 ```nginx
 user nginx;
@@ -324,7 +324,7 @@ http {
 
 ---
 
-## Subdomain Reverse Proxy Configuration
+## Subdomain Reverse Proxy Configuration (nginx/conf.d/sample.conf)
 
 Each service is exposed via its own subdomain.
 
@@ -355,6 +355,8 @@ server {
 }
 ```
 
+Full sample is [dx4.conf](./dx4.conf)
+
 ---
 
 # Database Design
@@ -372,6 +374,8 @@ server {
 * `deadlock_timeout` ≥ 30s
 
 PostgreSQL is never exposed externally.
+
+Perform the [Postgres configuration step described by Doxis](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.0/en-us/IG_Doxis_CSB/WEBHELP/APP_CSB/topics/top_InstallDB_PostgresIntro.html) or use this [dx4CreatePostgresSchema.psql](./dx4CreatePostgresSchema.psql) script to create the schemas. 
 
 ---
 
