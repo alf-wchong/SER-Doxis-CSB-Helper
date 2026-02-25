@@ -43,6 +43,40 @@ Docker backend network
     └── cerebro
 ```
 
+## Architecture Diagram
+
+```mermaid
+flowchart TB
+
+    Browser["Windows Browser\n(Hosts → 127.0.0.1)"]
+    Nginx["NGINX\nPorts 80 / 443\nTLS Termination"]
+
+    subgraph Docker["Docker (WSL2) - backend network"]
+        CSB["dx4-csb :8080"]
+        Admin["dx4-admin :9080"]
+        Agent["dx4-agent :8070"]
+        Storage["dx4-storage :8080"]
+        Fulltext["dx4-fulltext :3099"]
+        Elastic["dx4-elastic :9200\n(Internal Only)"]
+        Postgres["dx4-postgres :5432\n(Internal Only)"]
+        PgAdmin["dx4-pgadmin :80"]
+        Cerebro["dx4-cerebro :9000"]
+    end
+
+    Browser -->|HTTPS| Nginx
+
+    Nginx -->|csb.dx4...| CSB
+    Nginx -->|admin.dx4...| Admin
+    Nginx -->|agent.dx4...| Agent
+    Nginx -->|storage.dx4...| Storage
+    Nginx -->|fulltext.dx4...| Fulltext
+    Nginx -->|pgadmin.dx4...| PgAdmin
+    Nginx -->|cerebro.dx4...| Cerebro
+
+    CSB --> Elastic
+    CSB --> Postgres
+    Admin --> Postgres
+```
 ---
 
 ## Runtime Environment
