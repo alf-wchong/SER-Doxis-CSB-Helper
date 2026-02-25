@@ -121,9 +121,20 @@ flowchart TB
 ---
 
 ## docker-compose.yml
-
+(Incorporating Jira [SUPP-13793](https://ser-group.atlassian.net/browse/SUPP-13793?focusedCommentId=1231782))
 ```yaml
 version: "3.9"
+
+##############################################################
+# Production-Structured Single Node DX4 Deployment
+#
+# - SSL termination at NGINX
+# - PostgreSQL internal only
+# - Elasticsearch internal only
+# - All other services reverse proxied
+# - Vendor-compatible container names
+# - Network segmentation (frontend / backend)
+##############################################################
 
 services:
 
@@ -138,10 +149,16 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      # NGINX configuration
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/auth:/etc/nginx/auth:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
+
+      # Mount entire letsencrypt directory (required because
+      # live/ paths are symlinks to archive/)
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+
     networks:
       - backend
     depends_on:
@@ -156,6 +173,7 @@ services:
 
   ##############################################################
   # PostgreSQL (Internal Only)
+  # Required container name: dx4-postgres
   ##############################################################
   dx4-postgres:
     image: postgres:15
@@ -168,7 +186,7 @@ services:
     networks:
       backend:
         aliases:
-          - dx4postgres
+          - dx4postgres   # Required by DX4 environment config
           - dx4-postgres
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -186,7 +204,9 @@ services:
     env_file:
       - dx4-csb.env
     networks:
-      - backend
+      backend:
+        aliases:
+          - dx4elastic
     volumes:
       - dx4ElasticData:/home/doxis4/dx4ElasticData
     healthcheck:
@@ -196,8 +216,9 @@ services:
       retries: 5
 
   ##############################################################
-  # DX4 Core Services
+  # DX4 Core Services (Backend + Frontend)
   ##############################################################
+
   dx4-csb:
     image: dx4-csb:latest
     container_name: dx4-csb
@@ -205,7 +226,9 @@ services:
     env_file:
       - dx4-csb.env
     networks:
-      - backend
+      backend:
+        aliases:
+          - dx4csb
     depends_on:
       dx4-postgres:
         condition: service_healthy
@@ -219,7 +242,9 @@ services:
     env_file:
       - dx4-csb.env
     networks:
-      - backend
+      backend:
+        aliases:
+          - dx4admin
     depends_on:
       - dx4-csb
 
@@ -260,14 +285,14 @@ services:
       - backend
 
   ##############################################################
-  # pgAdmin
+  # pgAdmin (Public via NGINX)
   ##############################################################
   pgadmin:
     image: dpage/pgadmin4:8
     container_name: dx4-pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@dx4localdev.duckdns.org
+      PGADMIN_DEFAULT_EMAIL: admin@***REMOVED***.duckdns.org 
       PGADMIN_DEFAULT_PASSWORD: ppp
       PGADMIN_CONFIG_PROXY_X_FOR_COUNT: '1'
       PGADMIN_CONFIG_PROXY_X_PROTO_COUNT: '1'
@@ -278,19 +303,32 @@ services:
       - backend
 
   ##############################################################
-  # Cerebro
+  # Cerebro (Elastic UI)
   ##############################################################
   cerebro:
     image: lmenezes/cerebro
     container_name: dx4-cerebro
     restart: unless-stopped
+    environment:
+      CEREBRO_PORT: 9000
     networks:
       - backend
+
+##############################################################
+# Persistent Volumes
+##############################################################
 
 volumes:
   dx4PostgresData:
   dx4ElasticData:
   pgadminData:
+
+##############################################################
+# Network Segmentation
+#
+# frontend: exposed via NGINX
+# backend: internal service communication
+##############################################################
 
 networks:
   backend:
