@@ -13,7 +13,7 @@ flowchart TB
     Q1 -- No, I need to generate them --> Q3{"How do you want to design them?"}
     Q3 -- Via HTML/CSS --> Iron["IronPDF<br><i>Best for Web Devs</i>"]
     Q3 -- Via Code Objects/DOM --> Aspose["Aspose.PDF<br><i>Easiest Plug-and-Play API</i>"]
-    Q1 -- Enterprise Support Needed --> iText["iText 8<br><i>Industry Standard / High Control</i>"]
+    Q1 -- Yes and commercial support preferred --> iText["iText 8<br><i>Industry Standard / High Control</i>"]
     
     style Iron fill:#bfb,stroke:#333
     style Aspose fill:#fdb,stroke:#333
