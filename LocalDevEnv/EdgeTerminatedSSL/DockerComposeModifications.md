@@ -49,34 +49,34 @@ Docker backend network
 ```mermaid
 flowchart TB
     %% External Entry
-    Browser["🌐 Windows Browser\n(127.0.0.1)"]
+    Browser["🌐 Windows Browser(127.0.0.1)"]
     
     subgraph Docker_Network ["Docker: backend network"]
         direction TB
         
         %% Reverse Proxy
-        Nginx["🛡️ NGINX (dx4-nginx)\nPorts 80/443\nSSL Termination"]
+        Nginx["🛡️ dx4-nginx Ports 80/443 SSL Termination"]
 
         %% Management Tools
         subgraph Management ["Management Stack"]
-            PgAdmin["dx4-pgadmin\n:80"]
-            Cerebro["dx4-cerebro\n:9000"]
+            PgAdmin["dx4-pgadmin:80"]
+            Cerebro["dx4-cerebro:9000"]
         end
 
         %% Core DX4 Stack
         subgraph DX4_Core ["DX4 Application Stack"]
-            CSB["dx4-csb\n:8080"]
-            Admin["dx4-admin\n:9080"]
-            Agent["dx4-agent\n:8070"]
-            Storage["dx4-storage\n:8080"]
-            Fulltext["dx4-fulltext\n:3099"]
-            WebCube["dx4-webcube\n(Doxis UI)"]
+            CSB["dx4-csb:8080"]
+            Admin["dx4-admin:9080"]
+            Agent["dx4-agent:8070"]
+            Storage["dx4-storage:8080"]
+            Fulltext["dx4-fulltext:3099"]
+            WebCube["dx4-webcube"]
         end
 
         %% Internal Data Layer
         subgraph Data_Layer ["Data Layer (Internal Only)"]
-            Elastic["dx4-elastic\n:9200"]
-            Postgres["dx4-postgres\n:5432"]
+            Elastic["dx4-elastic:9200"]
+            Postgres["dx4-postgres:5432"]
         end
     end
 
