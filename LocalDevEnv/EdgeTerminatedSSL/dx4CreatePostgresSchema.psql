@@ -13,27 +13,11 @@
    - No superuser privileges
 
  This script is idempotent (safe to re-run).
+ Assumes the database already exists because database creation is not
+ allowed inside a transaction block. The dblink extension is required 
+ to do this but is overkill for this situation where the database 
+ could simply be created outside of this script.
 **********************************************************************/
-
-\echo '------------------------------------------------------------'
-\echo 'Creating main DX4 database (if it does not already exist)'
-\echo '------------------------------------------------------------'
-
-DO
-$$
-BEGIN
-    IF NOT EXISTS (
-        SELECT FROM pg_database WHERE datname = 'dx4'
-    ) THEN
-        PERFORM dblink_exec(
-            'dbname=postgres',
-            'CREATE DATABASE dx4
-             WITH ENCODING ''UTF8''
-             TEMPLATE template0'
-        );
-    END IF;
-END
-$$;
 
 \connect dx4
 
