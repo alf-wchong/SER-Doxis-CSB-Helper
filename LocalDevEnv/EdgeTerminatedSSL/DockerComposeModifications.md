@@ -123,8 +123,6 @@ flowchart TB
 ## docker-compose.yml
 (Incorporating Jira [SUPP-13793](https://ser-group.atlassian.net/browse/SUPP-13793?focusedCommentId=1231782))
 ```yaml
-version: "3.9"
-
 ##############################################################
 # Production-Structured Single Node DX4 Deployment
 #
@@ -149,16 +147,11 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      # NGINX configuration
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/auth:/etc/nginx/auth:ro
+      # Mount entire letsencrypt directory (live/* are symlinks into archive/*)
       - /etc/letsencrypt:/etc/letsencrypt:ro
-
-      # Mount entire letsencrypt directory (required because
-      # live/ paths are symlinks to archive/)
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-
     networks:
       - backend
     depends_on:
@@ -166,7 +159,6 @@ services:
       - dx4-admin
       - dx4-agent
       - dx4-storage
-      - dx4-fips
       - dx4-fulltext
       - pgadmin
       - cerebro
@@ -180,13 +172,13 @@ services:
     container_name: dx4-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: pppggg
     volumes:
       - dx4PostgresData:/var/lib/postgresql/data
     networks:
       backend:
         aliases:
-          - dx4postgres   # Required by DX4 environment config
+          - dx4postgres
           - dx4-postgres
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -234,6 +226,16 @@ services:
         condition: service_healthy
       dx4-elastic:
         condition: service_healthy
+    volumes:
+      - type: volume
+        source: dx4Shared
+        target: /home/doxis4/shared
+    healthcheck:
+      test: ["CMD", "wget", "--no-proxy", "--spider", "http://localhost:8080/sedna-transfer-service-xf/isAlive"]
+      start_period: 90s
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   dx4-admin:
     image: dx4-admin:latest
@@ -247,6 +249,16 @@ services:
           - dx4admin
     depends_on:
       - dx4-csb
+    volumes:
+      - type: volume
+        source: dx4Shared
+        target: /home/doxis4/shared
+    healthcheck:
+      test: ["CMD", "wget", "--no-proxy", "--spider", "http://localhost:9080/isAlive"]
+      start_period: 90s
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   dx4-agent:
     image: dx4-agent:latest
@@ -255,7 +267,21 @@ services:
     env_file:
       - dx4-csb.env
     networks:
-      - backend
+      backend:
+        aliases:
+          - dx4agent
+    depends_on:
+      - dx4-csb
+    volumes:
+      - type: volume
+        source: dx4Shared
+        target: /home/doxis4/shared
+    healthcheck:
+      test: ["CMD", "wget", "--no-proxy", "--spider", "http://localhost:8070/isAlive"]
+      start_period: 90s
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   dx4-storage:
     image: dx4-storage:latest
@@ -264,16 +290,25 @@ services:
     env_file:
       - dx4-csb.env
     networks:
-      - backend
-
-  dx4-fips:
-    image: dx4-fips:latest
-    container_name: dx4-fips
-    restart: unless-stopped
-    env_file:
-      - dx4-csb.env
-    networks:
-      - backend
+      backend:
+        aliases:
+          - dx4storage
+    depends_on:
+      - dx4-csb
+    volumes:
+      - type: volume
+        source: dx4Shared
+        target: /home/doxis4/shared
+      # Optional below: only if you use a file adapter
+      - type: volume
+        source: dx4Storage
+        target: /home/doxis4/dx4Storage
+    healthcheck:
+      test: ["CMD", "wget", "--no-proxy", "--spider", "http://localhost:8080/storagesystem/isAlive"]
+      start_period: 90s
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   dx4-fulltext:
     image: dx4-fulltext:latest
@@ -282,21 +317,35 @@ services:
     env_file:
       - dx4-csb.env
     networks:
-      - backend
+      backend:
+        aliases:
+          - dx4ft
+    depends_on:
+      - dx4-csb
+    volumes:
+      - type: volume
+        source: dx4Shared
+        target: /home/doxis4/shared
+    healthcheck:
+      test: ["CMD", "wget", "--no-proxy", "--spider", "http://localhost:3099/isAlive"]
+      start_period: 90s
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   ##############################################################
-  # pgAdmin (Public via NGINX)
+  # pgAdmin
   ##############################################################
   pgadmin:
     image: dpage/pgadmin4:8
     container_name: dx4-pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@dx4localdev.duckdns.org 
+      PGADMIN_DEFAULT_EMAIL: admin@dx4localdev.duckdns.org
       PGADMIN_DEFAULT_PASSWORD: ppp
-      PGADMIN_CONFIG_PROXY_X_FOR_COUNT: '1'
-      PGADMIN_CONFIG_PROXY_X_PROTO_COUNT: '1'
-      PGADMIN_CONFIG_PROXY_X_HOST_COUNT: '1'
+      PGADMIN_CONFIG_PROXY_X_FOR_COUNT: "1"
+      PGADMIN_CONFIG_PROXY_X_PROTO_COUNT: "1"
+      PGADMIN_CONFIG_PROXY_X_HOST_COUNT: "1"
     volumes:
       - pgadminData:/var/lib/pgadmin
     networks:
@@ -314,14 +363,43 @@ services:
     networks:
       - backend
 
+  ##############################################################
+  # webCube (Doxis UI)
+  ##############################################################
+  dx4-webcube:
+    image: dx4-webcube:14.3.1
+    container_name: dx4-webcube
+    restart: unless-stopped
+    networks:
+      backend:
+        aliases:
+          - dx4webcube
+    env_file:
+      - dx4-webcube.env
+    volumes:
+      - type: volume
+        source: dx4Shared
+        target: /home/doxis4/shared
+    healthcheck:
+      test: ["CMD", "wget", "--no-proxy", "--spider", "http://localhost:8080/webcube/admin"]
+      start_period: 90s
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 ##############################################################
 # Persistent Volumes
 ##############################################################
 
 volumes:
+  dx4Shared:
+    name: dx4Shared
   dx4PostgresData:
   dx4ElasticData:
   pgadminData:
+  # Optional below: only if you use a file adapter
+  dx4Storage:
+    name: dx4Storage
 
 ##############################################################
 # Network Segmentation
@@ -350,14 +428,21 @@ events {
 }
 
 http {
-    include /etc/nginx/mime.types;
-    default_type application/octet-stream;
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
 
     sendfile on;
     keepalive_timeout 65;
 
+    # WebSocket upgrade mapping (must be inside http{} scope)
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        ''      close;
+    }
+
     include /etc/nginx/conf.d/*.conf;
 }
+
 ```
 
 ---
@@ -393,7 +478,7 @@ server {
 }
 ```
 
-Full sample is [dx4.conf](./dx4.conf)
+Full sample is [dx4.conf](./dx4.conf) thay includes a section for webCube that also allows WebSockets to be used.
 
 ---
 
