@@ -39,6 +39,7 @@ Docker backend network
     ├── dx4-fulltext
     ├── dx4-elastic (internal)
     ├── dx4-postgres (internal)
+    ├── dx4-webcube
     ├── pgadmin
     └── cerebro
 ```
@@ -47,35 +48,71 @@ Docker backend network
 
 ```mermaid
 flowchart TB
+    %% External Entry
+    Browser["🌐 Windows Browser\n(127.0.0.1)"]
+    
+    subgraph Docker_Network ["Docker: backend network"]
+        direction TB
+        
+        %% Reverse Proxy
+        Nginx["🛡️ NGINX (dx4-nginx)\nPorts 80/443\nSSL Termination"]
 
-    Browser["Windows Browser\n(Hosts → 127.0.0.1)"]
-    Nginx["NGINX\nPorts 80 / 443\nTLS Termination"]
+        %% Management Tools
+        subgraph Management ["Management Stack"]
+            PgAdmin["dx4-pgadmin\n:80"]
+            Cerebro["dx4-cerebro\n:9000"]
+        end
 
-    subgraph Docker["Docker (WSL2) - backend network"]
-        CSB["dx4-csb :8080"]
-        Admin["dx4-admin :9080"]
-        Agent["dx4-agent :8070"]
-        Storage["dx4-storage :8080"]
-        Fulltext["dx4-fulltext :3099"]
-        Elastic["dx4-elastic :9200\n(Internal Only)"]
-        Postgres["dx4-postgres :5432\n(Internal Only)"]
-        PgAdmin["dx4-pgadmin :80"]
-        Cerebro["dx4-cerebro :9000"]
+        %% Core DX4 Stack
+        subgraph DX4_Core ["DX4 Application Stack"]
+            CSB["dx4-csb\n:8080"]
+            Admin["dx4-admin\n:9080"]
+            Agent["dx4-agent\n:8070"]
+            Storage["dx4-storage\n:8080"]
+            Fulltext["dx4-fulltext\n:3099"]
+            WebCube["dx4-webcube\n(Doxis UI)"]
+        end
+
+        %% Internal Data Layer
+        subgraph Data_Layer ["Data Layer (Internal Only)"]
+            Elastic["dx4-elastic\n:9200"]
+            Postgres["dx4-postgres\n:5432"]
+        end
     end
 
+    %% Routing
     Browser -->|HTTPS| Nginx
+    
+    %% Nginx Reverse Proxy Links
+    Nginx --> CSB
+    Nginx --> Admin
+    Nginx --> Agent
+    Nginx --> Storage
+    Nginx --> Fulltext
+    Nginx --> WebCube
+    Nginx --> PgAdmin
+    Nginx --> Cerebro
 
-    Nginx -->|csb.dx4...| CSB
-    Nginx -->|admin.dx4...| Admin
-    Nginx -->|agent.dx4...| Agent
-    Nginx -->|storage.dx4...| Storage
-    Nginx -->|fulltext.dx4...| Fulltext
-    Nginx -->|pgadmin.dx4...| PgAdmin
-    Nginx -->|cerebro.dx4...| Cerebro
-
-    CSB --> Elastic
-    CSB --> Postgres
+    %% Internal Dependencies & Healthchecks
+    CSB -.->|depends_on healthy| Postgres
+    CSB -.->|depends_on healthy| Elastic
+    
+    Admin --> CSB
+    Agent --> CSB
+    Storage --> CSB
+    Fulltext --> CSB
+    WebCube --> CSB
+    
+    %% Database specific links
     Admin --> Postgres
+    PgAdmin --> Postgres
+    Cerebro --> Elastic
+
+    %% Styling
+    style Postgres fill:#336791,color:#fff
+    style Elastic fill:#005571,color:#fff
+    style Nginx fill:#009639,color:#fff
+    style DX4_Core fill:#f9f9f9,stroke:#333,stroke-dasharray: 5 5
 ```
 ---
 
@@ -499,6 +536,20 @@ Full sample is [dx4.conf](./dx4.conf) thay includes a section for webCube that a
 PostgreSQL is never exposed externally.
 
 Perform the [Postgres configuration step described by Doxis](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.0/en-us/IG_Doxis_CSB/WEBHELP/APP_CSB/topics/top_InstallDB_PostgresIntro.html) or use this [dx4CreatePostgresSchema.psql](./dx4CreatePostgresSchema.psql) script to create the schemas. 
+### Using the provided scripts
+Note that the [script](./dx4CreatePostgresSchema.psql)  requires an existing database. The steps are:
+1. Create the database first with the following command before running the [script](./dx4CreatePostgresSchema.psql).
+   ```bash
+   docker exec -it dx4-postgres psql -U postgres -d postgres -c "CREATE DATABASE dx4 WITH ENCODING 'UTF8' TEMPLATE template0;"
+   ```
+2. Copy the  [dx4CreatePostgresSchema.psql](./dx4CreatePostgresSchema.psql) into the postgres container.
+   ```bash 
+   docker cp ./dx4CreatePostgresSchema.psql dx4-postgres:/dx4CreatePostgresSchema.psql
+   ```
+3. Run the Doxis provided dx4CreatePostgresDB.sh bash script. You get this bash script from the [CSB Docker images](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.1/en-us/DIG_Doxis_CSB/WEBHELP/index.html) distribution ISO/ZIP from Doxis.
+   ```bash
+   ./dx4CreatePostgresDB.sh
+   ```
 
 ---
 
@@ -516,23 +567,30 @@ Perform the [Postgres configuration step described by Doxis](https://services.se
 
 # Operational Commands
 
-Start stack:
-
-```bash
-docker compose up -d
-```
-
-Stop stack:
-
-```bash
-docker compose down
-```
-
-Restart NGINX only:
-
-```bash
-docker compose restart nginx
-```
+1. Start database
+   ```bash
+   docker compose up -d dx4-postgres
+   ```
+2. Complete the [postgres configuration step described by Doxis](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.0/en-us/IG_Doxis_CSB/WEBHELP/APP_CSB/topics/top_InstallDB_PostgresIntro.html) or use the [provided scripts](#using-the-provided-scripts) to do the same.
+3. Start the rest of the stack
+   ```bash
+   docker compose up -d
+   ```
+4. Do not use the Doxis provided dx4CreateCustomer.sh bash script as it assumes every Doxis component is served out of `localhost`, which in this setup with a reverse proxy, will not work well. Instead, install the [Doxis Admin Client](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.0/en-us/UG_Doxis_CSB/WEBHELP/APP_CSB/topics/top_UserManual_AdminCltStartStop_ChapIntro.html) on your workstation and follow the [instructions provided by Doxis to configure](https://services.sergroup.com/documentation/api/documentations/2/485/1482/WEBHELP/APP_CSB/topics/top_UserManual_Superadmin_AddNodesIntro.html) this Doxis system.
+    * Because of the use of the reverse proxy, the [Doxis Datastore+Filestore](https://services.sergroup.com/documentation/api/documentations/2/485/1482/WEBHELP/APP_CSB/topics/top_UserManual_Orgaadmin_Storage_Intro.html) creation through Admin Client may fail. Use this [guide](CreatingFileDatastoresWithCsbCmd.md) to do create [Doxis Datastore+Filestore](https://services.sergroup.com/documentation/api/documentations/2/485/1482/WEBHELP/APP_CSB/topics/top_UserManual_Orgaadmin_Storage_Intro.html) with [Doxis csbcmd](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.0/en-us/REF_Doxis_CSB_csbcmd/WEBHELP/index.html) instead.     
+5. Remember to login to the Doxis system with (Doxis cubeDesigner version ≥ 14.5.0)[https://services.sergroup.com/documentation/#/products/PD_cubeDesigner/14.5.0] before logging into webCube.
+6. Pause stack
+   ```bash
+   docker compose stop
+   ```
+7. Resume stack
+   ```bash
+   docker compose start
+   ```
+8. Destroy stack (**__Use with extreme caution, there is no going back__**)
+   ```bash
+   docker compose down -v
+   ```
 
 ---
 
