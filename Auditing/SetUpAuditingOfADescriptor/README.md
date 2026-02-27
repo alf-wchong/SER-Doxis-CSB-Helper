@@ -18,3 +18,10 @@
 
 7. webCube – On the document with the descriptor updated, use the history component to view the audit trail.  
    ![7](7.png)
+
+
+
+8. To search for deleted objects, because they don't show in webCube anymore, use csbcmd.
+```bash
+./csbcmd search.audittrail.informationobjects --globalSearch -id <Object_UUID> --showAllAttribute
+```
