@@ -1,0 +1,6 @@
+# Tuned for running on SER provided Dell Latitude 7640 equipped with i7-1370P 1.90 GHz and 32.0 GB
+[wsl2]
+memory=20GB
+processors=8
+swap=2GB
+localhostForwarding=true
