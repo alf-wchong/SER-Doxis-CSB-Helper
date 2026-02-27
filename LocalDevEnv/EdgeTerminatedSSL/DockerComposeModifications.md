@@ -121,6 +121,7 @@ flowchart TB
 * Windows 11 host
 
 * Docker running inside WSL2 (Fedora)
+  * See this [WSL2 configuration](.wslconfig) for VM tuning.
 
 * Local access via Windows `hosts` file:
 
