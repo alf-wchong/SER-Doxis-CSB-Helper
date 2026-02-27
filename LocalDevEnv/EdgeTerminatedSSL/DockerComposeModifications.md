@@ -210,7 +210,7 @@ services:
     container_name: dx4-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_PASSWORD: pppggg
+      POSTGRES_PASSWORD: ***REDACTED***
     volumes:
       - dx4PostgresData:/var/lib/postgresql/data
     networks:
@@ -380,7 +380,7 @@ services:
     restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@dx4localdev.duckdns.org
-      PGADMIN_DEFAULT_PASSWORD: ppp
+      PGADMIN_DEFAULT_PASSWORD: ***REDACTED***
       PGADMIN_CONFIG_PROXY_X_FOR_COUNT: "1"
       PGADMIN_CONFIG_PROXY_X_PROTO_COUNT: "1"
       PGADMIN_CONFIG_PROXY_X_HOST_COUNT: "1"
