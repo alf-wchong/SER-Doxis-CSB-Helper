@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document builds on the [publicly accessible Doxis CSB Docker guide](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.1/en-us/DIG_Doxis_CSB/WEBHELP/index.html) and describes a production-safe, single-node deployment of the Doxis-CSB stack using Docker inside WSL2 (Fedora) on a Windows 11 host.
+This document builds on the [publicly accessible Doxis CSB Docker guide](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.1/en-us/DIG_Doxis_CSB/WEBHELP/index.html) and describes a production-like, single-node deployment of the Doxis-CSB stack using Docker inside WSL2 (Fedora) on a Windows 11 host.
 
 The design emphasizes:
 
