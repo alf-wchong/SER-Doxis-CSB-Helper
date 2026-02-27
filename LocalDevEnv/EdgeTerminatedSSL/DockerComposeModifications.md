@@ -516,7 +516,7 @@ server {
 }
 ```
 
-Full sample is [dx4.conf](./dx4.conf) thay includes a section for webCube that also allows WebSockets to be used.
+Full sample is [dx4.conf](./dx4.conf) that includes a section for webCube that also allows WebSockets to be used.
 
 ---
 
@@ -579,7 +579,7 @@ Note that the [script](./dx4CreatePostgresSchema.psql)  requires an existing dat
    ```
 4. Do not use the Doxis provided dx4CreateCustomer.sh bash script as it assumes every Doxis component is served out of `localhost`, which in this setup with a reverse proxy, will not work well. Instead, install the [Doxis Admin Client](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.0/en-us/UG_Doxis_CSB/WEBHELP/APP_CSB/topics/top_UserManual_AdminCltStartStop_ChapIntro.html) on your workstation and follow the [instructions provided by Doxis to configure](https://services.sergroup.com/documentation/api/documentations/2/485/1482/WEBHELP/APP_CSB/topics/top_UserManual_Superadmin_AddNodesIntro.html) this Doxis system.
     * Because of the use of the reverse proxy, the [Doxis Datastore+Filestore](https://services.sergroup.com/documentation/api/documentations/2/485/1482/WEBHELP/APP_CSB/topics/top_UserManual_Orgaadmin_Storage_Intro.html) creation through Admin Client may fail. Use this [guide](CreatingFileDatastoresWithCsbCmd.md) to do create [Doxis Datastore+Filestore](https://services.sergroup.com/documentation/api/documentations/2/485/1482/WEBHELP/APP_CSB/topics/top_UserManual_Orgaadmin_Storage_Intro.html) with [Doxis csbcmd](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.0/en-us/REF_Doxis_CSB_csbcmd/WEBHELP/index.html) instead.     
-5. Remember to login to the Doxis system with (Doxis cubeDesigner version ≥ 14.5.0)[https://services.sergroup.com/documentation/#/products/PD_cubeDesigner/14.5.0] before logging into webCube.
+5. Remember to login to the Doxis system with [Doxis cubeDesigner version ≥ 14.5.0](https://services.sergroup.com/documentation/#/products/PD_cubeDesigner/14.5.0) before logging into webCube.
 6. Pause stack
    ```bash
    docker compose stop
