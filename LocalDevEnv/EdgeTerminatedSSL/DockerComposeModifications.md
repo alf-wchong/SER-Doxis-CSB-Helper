@@ -126,6 +126,7 @@ flowchart TB
 * Local access via Windows `hosts` file:
 
   ```
+  127.0.0.1 dx4localdev.duckdns.org
   127.0.0.1 csb.dx4localdev.duckdns.org
   127.0.0.1 admin.dx4localdev.duckdns.org
   127.0.0.1 agent.dx4localdev.duckdns.org
