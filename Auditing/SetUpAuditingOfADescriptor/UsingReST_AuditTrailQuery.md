@@ -49,7 +49,7 @@ Because your record deletion only showed up when you used `--globalSearch` in cs
   "searchInGlobalTable": true,
   "target1References": [
     {
-      "referenceId": "0a5b062f-bd40-45ba-8caa-c20bd57038cc",
+      "referenceId": "0a5b062f-bddd-bbba-8caa-cccbd57038cc",
       "schemaMetaType": "RECORD"
     }
   ],
@@ -84,7 +84,7 @@ curl -X POST "https://<csb-host>/restws/publicws/rest/api/v1/auditTrail/search" 
   -H "Content-Type: application/json" \
   -d '{
     "searchInGlobalTable": true,
-    "contentRepositoryIds": ["0bbb062f-bd40-45ba-8caa-c20bd57cccccshow"],
+    "contentRepositoryIds": ["0bbb062f-bd40-45ba-8caa-c20bd57ccccc"],
     "target1References": [
       {
         "referenceId": "0a5b062f-bd40-45ba-8caa-c20bd57038cc",
