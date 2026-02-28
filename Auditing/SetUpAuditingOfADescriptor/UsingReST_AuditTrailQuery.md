@@ -42,7 +42,7 @@ Because your record deletion only showed up when you used `--globalSearch` in cs
 * `searchInGlobalTable: true`
 * `target1References` containing your UUID with `schemaMetaType: "RECORD"`
 
-Example payload:
+### Example payload (global):
 
 ```json
 {
@@ -68,3 +68,41 @@ Then look in the response `AuditRecordWsTO` for:
 * `userLoginName`
 * `operationTypeNr`
 * `target1Reference.referenceId` (should match your UUID)
+
+## Concrete example: find who logically deleted your record UUID but **scoped to a repository** *and* still include the global table
+
+* set `searchInGlobalTable: true`
+* set `contentRepositoryIds: ["<repo-uuid>"]`
+
+That matches the OpenAPI fields: `searchInGlobalTable` and `contentRepositoryIds`. 
+
+### Example request (scoped + global)
+
+```bash
+curl -X POST "https://<csb-host>/restws/publicws/rest/api/v1/auditTrail/search" \
+  -H "Authorization: Bearer <JWT_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "searchInGlobalTable": true,
+    "contentRepositoryIds": ["0bbb062f-bd40-45ba-8caa-c20bd57cccccshow"],
+    "target1References": [
+      {
+        "referenceId": "0a5b062f-bd40-45ba-8caa-c20bd57038cc",
+        "schemaMetaType": "RECORD"
+      }
+    ],
+    "orderByStatements": [
+      { "orderColumn": "TIMESTAMP", "orderType": "ASC" }
+    ],
+    "maxHits": 200
+  }'
+```
+
+### What to look for in the response
+
+In the returned `AuditRecordWsTO` entries, the delete event should be the one with:
+
+* `operationTypeDescription` / `operationTypeNr` corresponding to **logical delete**
+* `timestamp` = deletion time
+* `userLoginName` = who deleted it
+* `target1Reference.referenceId` = your record UUID 
