@@ -21,9 +21,9 @@
 
 
 
-8. To search for deleted objects, because they don't show in webCube anymore, use csbcmd.
+8. To search for deleted objects, because they don't show in webCube anymore, use [csbcmd](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.2.0/en-us/REF_Doxis_CSB_csbcmd/WEBHELP/APP_CsbCmd/topics/ref_DX4CSB_audit_document.html).
 ```bash
 ./csbcmd search.audittrail.informationobjects --globalSearch -id <Object_UUID> --showAllAttribute
 ```
 
-9. If the csbcmd is not readily available, the [CSB ReST APIs](UsingReST_AuditTrailQuery.md) can be used as well.
+9. If [csbcmd](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.2.0/en-us/REF_Doxis_CSB_csbcmd/WEBHELP/APP_CsbCmd/topics/ref_DX4CSB_audit_document.html) is not readily available, [CSB ReST APIs](UsingReST_AuditTrailQuery.md) can be used as well.
