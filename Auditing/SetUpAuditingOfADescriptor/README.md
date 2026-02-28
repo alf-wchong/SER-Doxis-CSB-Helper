@@ -25,3 +25,5 @@
 ```bash
 ./csbcmd search.audittrail.informationobjects --globalSearch -id <Object_UUID> --showAllAttribute
 ```
+
+9. If the csbcmd is not readily available, the [CSB ReST APIs](UsingReST_AuditTrailQuery.md) can be used as well.
