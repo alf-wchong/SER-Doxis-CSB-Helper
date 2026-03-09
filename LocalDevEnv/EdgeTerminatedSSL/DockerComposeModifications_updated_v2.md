@@ -66,7 +66,7 @@ flowchart TB
         %% Core DX4 Stack
         subgraph DX4_Core ["DX4 Application Stack"]
             CSB["dx4-csb:8080"]
-            Admin["dx4-admin:9080"]
+            Admin["dx4-admin:9080 dx4adminclientThroughNoVnc:6080"]
             Agent["dx4-agent:8070"]
             Storage["dx4-storage:8080"]
             Fulltext["dx4-fulltext:3099"]
