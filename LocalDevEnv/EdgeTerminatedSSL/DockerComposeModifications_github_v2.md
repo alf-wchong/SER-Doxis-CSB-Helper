@@ -177,7 +177,6 @@ flowchart TB
 ##############################################################
 
 services:
-
   ##############################################################
   # Reverse Proxy (SSL Termination)
   ##############################################################
@@ -199,12 +198,11 @@ services:
     depends_on:
       - dx4-csb
       - dx4-admin
-      - dx4-admin
+      - dx4-agent
       - dx4-storage
       - dx4-fulltext
       - pgadmin
       - cerebro
-
   ##############################################################
   # PostgreSQL (Internal Only)
   # Required container name: dx4-postgres
@@ -214,7 +212,8 @@ services:
     container_name: dx4-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_PASSWORD: ***REDACTED***
+      - POSTGRES_PASSWORD=***REDACTED***
+      - POSTGRES_DB=dx4
     volumes:
       - dx4PostgresData:/var/lib/postgresql/data
     networks:
@@ -223,7 +222,7 @@ services:
           - dx4postgres
           - dx4-postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dx4"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -252,7 +251,6 @@ services:
   ##############################################################
   # DX4 Core Services (Backend + Frontend)
   ##############################################################
-
   dx4-csb:
     image: dx4-csb:latest
     container_name: dx4-csb
@@ -280,11 +278,30 @@ services:
       retries: 3
 
   dx4-admin:
+    # Build this image first:
+    #   docker build -t dx4-admin:14.3.1_vnc ./dx4-admin-vnc
     image: dx4-admin:14.3.1_vnc
     container_name: dx4-admin
     restart: unless-stopped
     env_file:
       - dx4-csb.env
+    environment:
+      # Required only if you want to protect the VNC session inside the container.
+      # Nginx basic-auth is still enforced at the HTTPS entrypoint.
+      # VNC_PASSWORD: "change-me"
+
+      # Optional: screen size / depth
+      GEOMETRY: "1600x900"
+      DEPTH: "24"
+
+      # Optional: where the Swing client lives and how to start it
+      ADMINCLIENT_DIR: "/home/doxis4/DOXiS4SoapAdminClient"
+      ADMINCLIENT_CMD: "./DOXiS4CSBAdminClient"
+
+      # Optional: ports inside the container
+      NOVNC_PORT: "6080"
+      VNC_PORT: "5900"
+
     networks:
       backend:
         aliases:
@@ -302,9 +319,9 @@ services:
       timeout: 10s
       retries: 3
 
-  dx4-admin:
-    image: dx4-admin:latest
-    container_name: dx4-admin
+  dx4-agent:
+    image: dx4-agent:latest
+    container_name: dx4-agent
     restart: unless-stopped
     env_file:
       - dx4-csb.env
@@ -376,7 +393,7 @@ services:
       retries: 3
 
   ##############################################################
-  # pgAdmin
+  # pgAdmin (RDBMS Database WUI)
   ##############################################################
   pgadmin:
     image: dpage/pgadmin4:8
@@ -392,9 +409,12 @@ services:
       - pgadminData:/var/lib/pgadmin
     networks:
       - backend
+    # Enable external access to pgadmin by bypassing NGINX if needed 
+    # ports:
+    #  - "5555:80"
 
   ##############################################################
-  # Cerebro (Elastic UI)
+  # Cerebro (Elastic WUI)
   ##############################################################
   cerebro:
     image: lmenezes/cerebro
@@ -406,7 +426,7 @@ services:
       - backend
 
   ##############################################################
-  # webCube (Doxis UI)
+  # webCube (Doxis WUI)
   ##############################################################
   dx4-webcube:
     image: dx4-webcube:14.3.1
@@ -432,7 +452,6 @@ services:
 ##############################################################
 # Persistent Volumes
 ##############################################################
-
 volumes:
   dx4Shared:
     name: dx4Shared
@@ -442,13 +461,6 @@ volumes:
   # Optional below: only if you use a file adapter
   dx4Storage:
     name: dx4Storage
-
-##############################################################
-# Network Segmentation
-#
-# frontend: exposed via NGINX
-# backend: internal service communication
-##############################################################
 
 networks:
   backend:
@@ -484,7 +496,6 @@ http {
 
     include /etc/nginx/conf.d/*.conf;
 }
-
 ```
 
 ---
