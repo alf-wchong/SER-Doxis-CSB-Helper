@@ -14,6 +14,9 @@ The design emphasizes:
 * No direct container port exposure except NGINX
 * Production-grade security headers
 * Windows hosts-file based local development
+* Doxis Admin Client GUI accessible through a web browser
+
+__TLDR__: To skip right to how you should deploy on your own machine, jump tp the [Operational Commands](#operational-commands) section  
 
 ---
 
@@ -162,310 +165,8 @@ flowchart TB
 
 ---
 
-## docker-compose.yml
-(Incorporating Jira [SUPP-13793](https://ser-group.atlassian.net/browse/SUPP-13793?focusedCommentId=1231782))
-```yaml
-##############################################################
-# Production-Structured Single Node DX4 Deployment
-#
-# - SSL termination at NGINX
-# - PostgreSQL internal only
-# - Elasticsearch internal only
-# - All other services reverse proxied
-# - Vendor-compatible container names
-# - Network segmentation (frontend / backend)
-##############################################################
-
-services:
-  ##############################################################
-  # Reverse Proxy (SSL Termination)
-  ##############################################################
-  nginx:
-    image: nginx:1.25-alpine
-    container_name: dx4-nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./nginx/auth:/etc/nginx/auth:ro
-      # Mount entire letsencrypt directory (live/* are symlinks into archive/*)
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-    networks:
-      - backend
-    depends_on:
-      - dx4-csb
-      - dx4-admin
-      - dx4-agent
-      - dx4-storage
-      - dx4-fulltext
-      - pgadmin
-      - cerebro
-  ##############################################################
-  # PostgreSQL (Internal Only)
-  # Required container name: dx4-postgres
-  ##############################################################
-  dx4-postgres:
-    image: postgres:15
-    container_name: dx4-postgres
-    restart: unless-stopped
-    environment:
-      - POSTGRES_PASSWORD=***REDACTED***
-      - POSTGRES_DB=dx4
-    volumes:
-      - dx4PostgresData:/var/lib/postgresql/data
-    networks:
-      backend:
-        aliases:
-          - dx4postgres
-          - dx4-postgres
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d dx4"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  ##############################################################
-  # Elasticsearch (Internal Only)
-  ##############################################################
-  dx4-elastic:
-    image: dx4-elastic:latest
-    container_name: dx4-elastic
-    restart: unless-stopped
-    env_file:
-      - dx4-csb.env
-    networks:
-      backend:
-        aliases:
-          - dx4elastic
-    volumes:
-      - dx4ElasticData:/home/doxis4/dx4ElasticData
-    healthcheck:
-      test: ["CMD", "wget", "--no-proxy", "-O", "/dev/null", "http://localhost:9200/_cluster/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-
-  ##############################################################
-  # DX4 Core Services (Backend + Frontend)
-  ##############################################################
-  dx4-csb:
-    image: dx4-csb:latest
-    container_name: dx4-csb
-    restart: unless-stopped
-    env_file:
-      - dx4-csb.env
-    networks:
-      backend:
-        aliases:
-          - dx4csb
-    depends_on:
-      dx4-postgres:
-        condition: service_healthy
-      dx4-elastic:
-        condition: service_healthy
-    volumes:
-      - type: volume
-        source: dx4Shared
-        target: /home/doxis4/shared
-    healthcheck:
-      test: ["CMD", "wget", "--no-proxy", "--spider", "http://localhost:8080/sedna-transfer-service-xf/isAlive"]
-      start_period: 90s
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  dx4-admin:
-    # Build this image first:
-    #   docker build -t dx4-admin:14.3.1_vnc ./dx4-admin-vnc
-    image: dx4-admin:14.3.1_vnc
-    container_name: dx4-admin
-    restart: unless-stopped
-    env_file:
-      - dx4-csb.env
-    environment:
-      # Required only if you want to protect the VNC session inside the container.
-      # Nginx basic-auth is still enforced at the HTTPS entrypoint.
-      # VNC_PASSWORD: "change-me"
-
-      # Optional: screen size / depth
-      GEOMETRY: "1600x900"
-      DEPTH: "24"
-
-      # Optional: where the Swing client lives and how to start it
-      ADMINCLIENT_DIR: "/home/doxis4/DOXiS4SoapAdminClient"
-      ADMINCLIENT_CMD: "./DOXiS4CSBAdminClient"
-
-      # Optional: ports inside the container
-      NOVNC_PORT: "6080"
-      VNC_PORT: "5900"
-
-    networks:
-      backend:
-        aliases:
-          - dx4admin
-    depends_on:
-      - dx4-csb
-    volumes:
-      - type: volume
-        source: dx4Shared
-        target: /home/doxis4/shared
-    healthcheck:
-      test: ["CMD", "wget", "--no-proxy", "--spider", "http://localhost:9080/isAlive"]
-      start_period: 90s
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  dx4-agent:
-    image: dx4-agent:latest
-    container_name: dx4-agent
-    restart: unless-stopped
-    env_file:
-      - dx4-csb.env
-    networks:
-      backend:
-        aliases:
-          - dx4agent
-    depends_on:
-      - dx4-csb
-    volumes:
-      - type: volume
-        source: dx4Shared
-        target: /home/doxis4/shared
-    healthcheck:
-      test: ["CMD", "wget", "--no-proxy", "--spider", "http://localhost:8070/isAlive"]
-      start_period: 90s
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  dx4-storage:
-    image: dx4-storage:latest
-    container_name: dx4-storage
-    restart: unless-stopped
-    env_file:
-      - dx4-csb.env
-    networks:
-      backend:
-        aliases:
-          - dx4storage
-    depends_on:
-      - dx4-csb
-    volumes:
-      - type: volume
-        source: dx4Shared
-        target: /home/doxis4/shared
-      # Optional below: only if you use a file adapter
-      - type: volume
-        source: dx4Storage
-        target: /home/doxis4/dx4Storage
-    healthcheck:
-      test: ["CMD", "wget", "--no-proxy", "--spider", "http://localhost:8080/storagesystem/isAlive"]
-      start_period: 90s
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  dx4-fulltext:
-    image: dx4-fulltext:latest
-    container_name: dx4-fulltext
-    restart: unless-stopped
-    env_file:
-      - dx4-csb.env
-    networks:
-      backend:
-        aliases:
-          - dx4ft
-    depends_on:
-      - dx4-csb
-    volumes:
-      - type: volume
-        source: dx4Shared
-        target: /home/doxis4/shared
-    healthcheck:
-      test: ["CMD", "wget", "--no-proxy", "--spider", "http://localhost:3099/isAlive"]
-      start_period: 90s
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  ##############################################################
-  # pgAdmin (RDBMS Database WUI)
-  ##############################################################
-  pgadmin:
-    image: dpage/pgadmin4:8
-    container_name: dx4-pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@dx4localdev.duckdns.org
-      PGADMIN_DEFAULT_PASSWORD: ***REDACTED***
-      PGADMIN_CONFIG_PROXY_X_FOR_COUNT: "1"
-      PGADMIN_CONFIG_PROXY_X_PROTO_COUNT: "1"
-      PGADMIN_CONFIG_PROXY_X_HOST_COUNT: "1"
-    volumes:
-      - pgadminData:/var/lib/pgadmin
-    networks:
-      - backend
-    # Enable external access to pgadmin by bypassing NGINX if needed 
-    # ports:
-    #  - "5555:80"
-
-  ##############################################################
-  # Cerebro (Elastic WUI)
-  ##############################################################
-  cerebro:
-    image: lmenezes/cerebro
-    container_name: dx4-cerebro
-    restart: unless-stopped
-    environment:
-      CEREBRO_PORT: 9000
-    networks:
-      - backend
-
-  ##############################################################
-  # webCube (Doxis WUI)
-  ##############################################################
-  dx4-webcube:
-    image: dx4-webcube:14.3.1
-    container_name: dx4-webcube
-    restart: unless-stopped
-    networks:
-      backend:
-        aliases:
-          - dx4webcube
-    env_file:
-      - dx4-webcube.env
-    volumes:
-      - type: volume
-        source: dx4Shared
-        target: /home/doxis4/shared
-    healthcheck:
-      test: ["CMD", "wget", "--no-proxy", "--spider", "http://localhost:8080/webcube/admin"]
-      start_period: 90s
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-##############################################################
-# Persistent Volumes
-##############################################################
-volumes:
-  dx4Shared:
-    name: dx4Shared
-  dx4PostgresData:
-  dx4ElasticData:
-  pgadminData:
-  # Optional below: only if you use a file adapter
-  dx4Storage:
-    name: dx4Storage
-
-networks:
-  backend:
-    driver: bridge
-```
+## [docker-compose.yml](docker-compose.yml)
+The [Docker Compose file provided by Doxis](https://services.sergroup.com/documentation/api/documentations/2/522/1528/WEBHELP/CSB/topics/reference-run-image-dockercompose.html) has been adpated to incorporate the changes described in this document is found in [docker-compose.yml](docker-compose.yml) in this directory. It has already incorporated Jira [SUPP-13793](https://ser-group.atlassian.net/browse/SUPP-13793?focusedCommentId=1231782).
 
 ---
 
@@ -608,48 +309,71 @@ Note that the [script](./dx4CreatePostgresSchema.psql)  requires an existing dat
 
 # Operational Commands
 
-1. Start database only (initial bootstrap)
+1. Clone this GitHub repo
+   ```bash
+   git clone https://github.com/alf-wchong/SER-Doxis-CSB-Helper.git
+   cd SER-Doxis-CSB-Helper
+   ```
+2. Update the Windows hosts file (so subdomains resolve locally)
+   * Edit as Administrator:
+     * `C:\Windows\System32\drivers\etc\hosts`
+   * Add entries (adjust domain as needed) as shown in [Runtime Environment](#runtime-environment)
+
+3. Mount the TLS certificates (Let’s Encrypt)
+   * Ensure your certs exist on the Windows/WSL host at:
+
+     * `/etc/letsencrypt`
+   * The compose file mounts it into nginx as:
+
+     * `/etc/letsencrypt:/etc/letsencrypt:ro`
+     * If you need a guide to get a free public certificate, follow this [guide](../../FreePublicCert.md) and when done, return to this point and resume.
+       * The guide does not tell you to restart NGINX when the certificates are renewed. You can set up your environment to auto restart NGINX everytime [`certbot` renews the certificate with](../../FreePublicCert.md#8%EF%B8%8F%E2%83%A3-automatic-renewal)
+         ```bash
+         certbot renew --quiet --deploy-hook "docker compose restart nginx"
+         ```
+4. Start database only (initial bootstrap)
    ```bash
    docker compose up -d dx4-postgres
    ```
-2. Create the `dx4` database (required before schema scripts)
-   ```bash
-   docker exec -it dx4-postgres psql -U postgres -d postgres -c "CREATE DATABASE dx4 WITH ENCODING 'UTF8' TEMPLATE template0;"
-   ```
-3. Run the Postgres schema setup (choose one)
+5. Run the Postgres schema setup (choose one)
    - Complete the [postgres configuration step described by Doxis](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.0/en-us/IG_Doxis_CSB/WEBHELP/APP_CSB/topics/top_InstallDB_PostgresIntro.html), **or**
    - Use the [provided scripts](#using-the-provided-scripts).
-4. Build the enhanced Admin image (must be built **before** bringing up the full stack)
+6. Build the enhanced Admin image (must be built **before** bringing up the full stack) using the [Dockerfile](dx4-admin-vnc/Dockerfile) in the [dx4-admin-vnc](./dx4-admin-vnc) directory
    ```bash
    docker build -t dx4-admin:14.3.1_vnc ./dx4-admin-vnc
    ```
-5. Start the rest of the stack
+   Start the rest of the stack
    ```bash
    docker compose up -d
    ```
-6. Configure the Doxis system using the in-container Admin Client (via noVNC)
+7. Configure the Doxis system using the in-container Admin Client (via noVNC)
    - Open in browser:
-     - `https://adminclient.<domain>/vnc.html?autoconnect=1&path=websockify` (e.g., `https://adminclient.dx4local.duckdns.org/vnc.html?autoconnect=1&path=websockify`)
-   - Configure **domain** and **organization** as required for your dev setup.
-7. Run cubeDesigner once before using webCube
+     - `https://adminclient.<domain>/vnc.html?autoconnect=1&path=websockify`
+       - (e.g., `https://adminclient.dx4local.duckdns.org/vnc.html?autoconnect=1&path=websockify`)
+   - [Log into Admin Client]((https://services.sergroup.com/documentation/api/documentations/2/485/1482/WEBHELP/APP_CSB/topics/tsk_UserManual_AdminCltStartStop_Logon.html))
+     - Configure [**domain**](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.0/en-us/UG_Doxis_CSB/WEBHELP/APP_CSB/topics/top_UserManual_Superadmin_ChapIntro.html) and [**organization**](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.0/en-us/UG_Doxis_CSB/WEBHELP/APP_CSB/topics/top_UserManual_Orgaadmin_ChapIntro.html) as required for your setup.
+8. Run cubeDesigner once before using webCube
    - Launch cubeDesigner (>= 14.5.0) and log in to the system.
    - This allows security modules to be initialized automatically so the system becomes usable for development.
-8. Access webCube
+     - If you see in the webCube logs an error similar to `com.ser.sedna.client.bluelineimpl.exception.SEDNABlueLineException: SecurityType "MenuItems" is missing. System might not be initialized with Doxis4 cubeDesigner`, it is highly likely that either the cubeDesigner you used is older than webCube or the initial setup of the security modules wasn't completed by cubeDesigner. When cubeDesigner does this, it does so without notifying the user and it does take a few minutes so you have to be patient.
+
+9. Access webCube
    - `https://<webcube-subdomain>.<domain>/` (as defined by your nginx vhost)
-9. Pause stack
-   ```bash
-   docker compose stop
-   ```
-10. Resume stack
+     - eg `https://dx4local.duckdns.org/webcube/`
+10. Pause stack
+     ```bash
+     docker compose stop
+     ```
+11. Resume stack
     ```bash
     docker compose start
     ```
-11. Destroy stack (**__Use with extreme caution, there is no going back__**)
+12. Destroy stack (**__Use with extreme caution, there is no going back__**)
     ```bash
     docker compose down -v
     ```
 
-## Restarting the Admin Client without restarting the container
+### Restarting the Admin Client without restarting the container
 
 If you need to restart only the Swing Admin Client (not the whole `dx4-admin` container):
 
@@ -664,14 +388,15 @@ Note: `docker exec` shells may not have `DISPLAY` set; exporting `DISPLAY=:1` en
 
 # Design Decisions
 
-| Decision                   | Rationale                            |
-| -------------------------- | ------------------------------------ |
-| Subdomain routing          | Cleaner, avoids proxy path rewriting |
-| Single Docker network      | Simpler, sufficient for single-node  |
-| No container port exposure | Reverse proxy only entry point       |
-| TLS at NGINX               | Centralized certificate management   |
-| Internal PostgreSQL        | Prevents accidental public exposure  |
-| Healthchecks               | Ensure service readiness             |
+| Decision                       | Rationale                            |
+| --------------------------     | ------------------------------------ |
+| Subdomain routing              | Cleaner, avoids proxy path rewriting |
+| Single Docker network          | Simpler, sufficient for single-node  |
+| No container port exposure     | Reverse proxy only entry point       |
+| TLS at NGINX                   | Centralized certificate management   |
+| Internal PostgreSQL            | Prevents accidental public exposure  |
+| Healthchecks                   | Ensure service readiness             |
+| Admin Client exposed with noVnc| Convenient all-in-one deployment     |
 
 ---
 
