@@ -535,7 +535,7 @@ Key points:
 
 Browser URL pattern:
 
-- `https://adminclient.<domain>/vnc.html?autoconnect=1&path=websockify` (e.g., `https://adminclient.***REMOVED***.duckdns.org/vnc.html?autoconnect=1&path=websockify`)
+- `https://adminclient.<domain>/vnc.html?autoconnect=1&path=websockify` (e.g., `https://adminclient.dx4local.duckdns.org/vnc.html?autoconnect=1&path=websockify`)
 
 Troubleshooting tip (name-based TLS vhosts): testing with `https://localhost/...` can hit the *default* server block and return 404. To test the correct vhost locally, use curl with SNI/Host override:
 
@@ -616,7 +616,7 @@ Note that the [script](./dx4CreatePostgresSchema.psql)  requires an existing dat
    ```
 6. Configure the Doxis system using the in-container Admin Client (via noVNC)
    - Open in browser:
-     - `https://adminclient.<domain>/vnc.html?autoconnect=1&path=websockify` (e.g., `https://adminclient.***REMOVED***.duckdns.org/vnc.html?autoconnect=1&path=websockify`)
+     - `https://adminclient.<domain>/vnc.html?autoconnect=1&path=websockify` (e.g., `https://adminclient.dx4local.duckdns.org/vnc.html?autoconnect=1&path=websockify`)
    - Configure **domain** and **organization** as required for your dev setup.
 7. Run cubeDesigner once before using webCube
    - Launch cubeDesigner (>= 14.5.0) and log in to the system.
