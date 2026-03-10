@@ -332,7 +332,18 @@ Note that the [script](./dx4CreatePostgresSchema.psql)  requires an existing dat
 
      * `/etc/letsencrypt:/etc/letsencrypt:ro`
 
-4. Start database only (initial bootstrap)
+4. In the directory where [docker-compose.yml](docker-compose.yml) is, create the `dx4-csb.env` file using the values listed in the [Required environment variables](https://services.sergroup.com/documentation/api/documentations/2/522/1528/WEBHELP/CSB/topics/reference-run-image-docker.html#reference_run_image__available_docker_images) table published by Doxis.
+     - To enable remote debugging for the [Agent Service](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.0/en-us/IG_Doxis_CSB/WEBHELP/APP_CSB/topics/top_InstallCSB_AgentServiceIntro.html), specify the _JDWP agent configuration string_ in the `DX4_AGENTSERVER_JAVA_OPTS` entry in `dx4-csb.env`.
+       ```plaintext
+       DX4_AGENTSERVER_JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+       ```
+        - Remember to expose the [JDWP](https://www.baeldung.com/java-application-remote-debugging?utm_source=chatgpt.com) port in the `dx4-agent` section of [docker-compose.yml](docker-compose.yml)
+          ```yaml
+              ports:
+                - "5005:5005"
+          ```     
+
+4. Start __only__ the database (initial bootstrap)
    ```bash
    docker compose up -d dx4-postgres
    ```
