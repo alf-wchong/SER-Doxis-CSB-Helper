@@ -337,6 +337,8 @@ Note that the [script](./dx4CreatePostgresSchema.psql)  requires an existing dat
        ```plaintext
        DX4_AGENTSERVER_JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
        ```
+       Though you may want to lock down access by specifying IPs rather than `*` for the `address`. For as Szczupakowski said, it's an access point into your Agent Service. 
+       
         - Remember to expose the [JDWP](https://www.baeldung.com/java-application-remote-debugging?utm_source=chatgpt.com) port in the `dx4-agent` section of [docker-compose.yml](docker-compose.yml)
           ```yaml
               ports:
