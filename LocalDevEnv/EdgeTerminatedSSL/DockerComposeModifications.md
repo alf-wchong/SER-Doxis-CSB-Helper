@@ -43,6 +43,7 @@ Docker backend network
     ├── dx4-elastic (internal)
     ├── dx4-postgres (internal)
     ├── dx4-webcube
+    ├── dx4-businessstudio
     ├── pgadmin
     └── cerebro
 ```
@@ -65,6 +66,7 @@ flowchart TB
             PgAdmin["dx4-pgadmin:80"]
             Cerebro["dx4-cerebro:9000"]
             AdminClient["dx4-admin (noVNC):6080/ws"]
+            BusinessStudio["dx4-businessstudio:8080/ws"]
         end
 
         %% Core DX4 Stack
@@ -94,6 +96,7 @@ flowchart TB
     Nginx --> Storage
     Nginx --> Fulltext
     Nginx --> WebCube
+    Nginx --> BusinessStudio
     Nginx --> PgAdmin
     Nginx --> Cerebro
     Nginx --> AdminClient
@@ -107,6 +110,7 @@ flowchart TB
     Storage --> CSB
     Fulltext --> CSB
     WebCube --> CSB
+    BusinessStudio --> CSB
     
     %% Database specific links
     Admin --> Postgres
@@ -344,15 +348,18 @@ Note that the [script](./dx4CreatePostgresSchema.psql)  requires an existing dat
               ports:
                 - "5005:5005"
           ```     
-
-4. Start __only__ the database (initial bootstrap)
+5. In the directory where [docker-compose.yml](docker-compose.yml) is, create the `dx4-businessstudio.env` file using the variables listed in [Business Studio's Environment variables](https://services.sergroup.com/documentation/#/view/PD_BusinessStudio/14.2.1/en-us/DIG_Doxis_BusinessStudio/WEBHELP/BUSINESSSTUDIO/topics/reference-environment-variables.html)) page published by Doxis.
+   - At bare minimum, the `dx4-businessstudio.env` file must contain the variables listed in this [example](https://services.sergroup.com/documentation/#/view/PD_BusinessStudio/14.2.1/en-us/DIG_Doxis_BusinessStudio/WEBHELP/BUSINESSSTUDIO/topics/reference-examples.html).
+       - __Note:__ The `tenant` parameter should be provided with the name of the [Organization](https://services.sergroup.com/documentation/api/documentations/2/485/1482/WEBHELP/APP_CSB/topics/tsk_UserManual_Superadmin_AddNodes_CreateOrganization.html) that will created as part of the [setup process](#9-configure-the-doxis-system-using-the-in-container-admin-client-via-novnc).
+6. Start __only__ the database (initial bootstrap)
    ```bash
    docker compose up -d dx4-postgres
    ```
-5. Run the Postgres schema setup (choose one)
+7. Run the Postgres schema setup (choose one)
    - Complete the [postgres configuration step described by Doxis](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.0/en-us/IG_Doxis_CSB/WEBHELP/APP_CSB/topics/top_InstallDB_PostgresIntro.html), **or**
    - Use the [provided scripts](#using-the-provided-scripts).
-6. Build the enhanced Admin image (must be built **before** bringing up the full stack) using the [Dockerfile](dx4-admin-vnc/Dockerfile) in the [dx4-admin-vnc](./dx4-admin-vnc) directory
+
+8. Build the enhanced Admin image (must be built **before** bringing up the full stack) using the [Dockerfile](dx4-admin-vnc/Dockerfile) in the [dx4-admin-vnc](./dx4-admin-vnc) directory
    ```bash
    docker build -t dx4-admin:14.3.1_vnc ./dx4-admin-vnc
    ```
@@ -360,29 +367,29 @@ Note that the [script](./dx4CreatePostgresSchema.psql)  requires an existing dat
    ```bash
    docker compose up -d
    ```
-7. Configure the Doxis system using the in-container Admin Client (via noVNC)
+ ##### 9. Configure the Doxis system using the in-container Admin Client (via noVNC)
    - Open in browser:
      - `https://adminclient.<domain>/vnc.html?autoconnect=1&path=websockify`
        - (e.g., `https://adminclient.dx4local.duckdns.org/vnc.html?autoconnect=1&path=websockify`)
    - [Log into Admin Client]((https://services.sergroup.com/documentation/api/documentations/2/485/1482/WEBHELP/APP_CSB/topics/tsk_UserManual_AdminCltStartStop_Logon.html))
      - Configure [**domain**](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.0/en-us/UG_Doxis_CSB/WEBHELP/APP_CSB/topics/top_UserManual_Superadmin_ChapIntro.html) and [**organization**](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.0/en-us/UG_Doxis_CSB/WEBHELP/APP_CSB/topics/top_UserManual_Orgaadmin_ChapIntro.html) as required for your setup.
-8. Run cubeDesigner once before using webCube
+10. Run cubeDesigner once before using webCube
    - Launch cubeDesigner (>= 14.5.0) and log in to the system.
    - This allows security modules to be initialized automatically so the system becomes usable for development.
      - If you see in the webCube logs an error similar to `com.ser.sedna.client.bluelineimpl.exception.SEDNABlueLineException: SecurityType "MenuItems" is missing. System might not be initialized with Doxis4 cubeDesigner`, it is highly likely that either the cubeDesigner you used is older than webCube or the initial setup of the security modules wasn't completed by cubeDesigner. When cubeDesigner does this, it does so without notifying the user and it does take a few minutes so you have to be patient.
 
-9. Access webCube
-   - `https://<webcube-subdomain>.<domain>/` (as defined by your nginx vhost)
+11. Access webCube
+   - `https://<webcube-subdomain>.<domain>/` (as defined by your `nginx` vhost)
      - eg `https://dx4local.duckdns.org/webcube/`
-10. Pause stack
+12. Pause stack
      ```bash
      docker compose stop
      ```
-11. Resume stack
+13. Resume stack
     ```bash
     docker compose start
     ```
-12. Destroy stack (**__Use with extreme caution, there is no going back__**)
+14. Destroy stack (**__Use with extreme caution, there is no going back__**)
     ```bash
     docker compose down -v
     ```
