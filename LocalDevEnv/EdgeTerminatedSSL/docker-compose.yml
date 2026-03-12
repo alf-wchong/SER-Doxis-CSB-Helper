@@ -34,6 +34,8 @@ services:
       - dx4-agent
       - dx4-storage
       - dx4-fulltext
+      - dx4-webcube
+      - dx4-businessstudio
       - pgadmin
       - cerebro
   ##############################################################
@@ -281,6 +283,34 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  ##############################################################
+  # cubeDesigner (Doxis BizApp development UI)
+  ##############################################################
+  dx4-businessstudio:
+    image: dx4-businessstudio:14.2.1
+    container_name: dx4-businessstudio
+    restart: unless-stopped
+    env_file:
+      - dx4-businessstudio.env
+    networks:
+      backend:
+        aliases:
+          - dx4businessstudio
+          - dx4-businessstudio
+    depends_on:
+      dx4-csb:
+        condition: service_healthy
+    volumes:
+      - type: volume
+        source: dx4Shared
+        target: /home/doxis4/shared
+    healthcheck:
+      test: ["CMD", "wget", "--no-proxy", "--spider", "http://localhost:8080/businessstudio/api/isAlive"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
 ##############################################################
 # Persistent Volumes
