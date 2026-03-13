@@ -347,7 +347,8 @@ Note that the [script](./dx4CreatePostgresSchema.psql)  requires an existing dat
           ```yaml
               ports:
                 - "5005:5005"
-          ```     
+          ```
+     - See [JdwpHowToForEclipse](../RemoteDebugging/Eclipse/JdwpHowToForEclipse.md) for a guide to configure [Eclipse](https://www.eclipse.org/downloads/packages/release/2024-09/r/eclipse-ide-java-developers) for remote debugging.  
 5. In the directory where [docker-compose.yml](docker-compose.yml) is, create the `dx4-businessstudio.env` file using the variables listed in [Business Studio's Environment variables](https://services.sergroup.com/documentation/#/view/PD_BusinessStudio/14.2.1/en-us/DIG_Doxis_BusinessStudio/WEBHELP/BUSINESSSTUDIO/topics/reference-environment-variables.html)) page published by Doxis.
    - At bare minimum, the `dx4-businessstudio.env` file must contain the variables listed in this [example](https://services.sergroup.com/documentation/#/view/PD_BusinessStudio/14.2.1/en-us/DIG_Doxis_BusinessStudio/WEBHELP/BUSINESSSTUDIO/topics/reference-examples.html).
        - __Note:__ The `tenant` parameter should be provided with the name of the [Organization](https://services.sergroup.com/documentation/api/documentations/2/485/1482/WEBHELP/APP_CSB/topics/tsk_UserManual_Superadmin_AddNodes_CreateOrganization.html) that will created as part of the [setup process](#9-configure-the-doxis-system-using-the-in-container-admin-client-via-novnc).
