@@ -1,6 +1,6 @@
 # HowTo: Enable Remote Debugging (JDWP) in Eclipse for a Jetty JVM
 
-This guide walks through enabling **JDWP remote debugging** for a Java application (e.g., Jetty) and attaching to it from **Eclipse IDE for Enterprise Java and Web Developers**.
+This guide walks through enabling **JDWP remote debugging** for a Java application (e.g., Jetty) and attaching to it from [**Eclipse IDE for Enterprise Java and Web Developers**](https://www.eclipse.org/downloads/packages/release/2026-03/r/eclipse-ide-enterprise-java-and-web-developers).
 
 ---
 
@@ -11,14 +11,14 @@ You are configuring:
 1. The **JVM (Jetty)** to start with the JDWP debug agent enabled.
 2. **Eclipse** to attach to that running JVM via a socket.
 
-JDWP = *Java Debug Wire Protocol*  
+[JDWP](https://www.baeldung.com/java-application-remote-debugging) = *Java Debug Wire Protocol*  
 It is the protocol Eclipse uses to communicate with a running JVM for debugging.
 
 ---
 
 # Prerequisites
 
-- Eclipse IDE (tested with 2024-09 / 4.33.0)
+- [Eclipse IDE](https://www.eclipse.org/downloads/packages/release/2024-09/r/eclipse-ide-java-developers) (tested with 2024-09 / 4.33.0)
 - Java 8+ (Java 17+ recommended)
 - Jetty (or any Java app you want to debug. [Doxis Agent Server](https://services.sergroup.com/documentation/api/documentations/2/485/1482/WEBHELP/APP_CSB/topics/ref_UserManual_AppReference_ConfigFiles_AgentService.html) is Jetty)
 - Eclipse IDE (through OS connectivity) access to the JVM process
