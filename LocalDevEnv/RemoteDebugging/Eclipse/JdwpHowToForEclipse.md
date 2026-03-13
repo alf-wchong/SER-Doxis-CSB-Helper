@@ -52,8 +52,8 @@ You must start the JVM with the JDWP agent enabled.
 java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar start.jar
 ```
 
-> Adjust according to how your Jetty server is launched.
-> If the Jetty server is [Doxis Agent Server](https://services.sergroup.com/documentation/api/documentations/2/485/1482/WEBHELP/APP_CSB/topics/ref_UserManual_AppReference_ConfigFiles_AgentService.html), see the [JDWP item in the Operational Commands for a Doxis CSB deployment](../../../EdgeTerminatedSSL/DockerComposeModifications.md#operational-commands)
+> Adjust according to how your Jetty server is launched.\
+> If the Jetty server is [Doxis Agent Server](https://services.sergroup.com/documentation/api/documentations/2/485/1482/WEBHELP/APP_CSB/topics/ref_UserManual_AppReference_ConfigFiles_AgentService.html), see the [JDWP item in the Operational Commands for a Doxis CSB deployment](../../EdgeTerminatedSSL/DockerComposeModifications.md#operational-commands)
 
 ---
 
@@ -91,7 +91,6 @@ If you see a Java process listening on 5005, JDWP is enabled correctly.
 Debug As → Debug Configurations…
 ```
 
-📸 *[Screenshot Placeholder — Debug Configurations Menu]*
 ![Screenshot Placeholder — Debug Configurations Menu](images/1.DebugAs-DebugConf.png)
 
 ---
@@ -100,9 +99,8 @@ Debug As → Debug Configurations…
 
 1. Select **Remote Java Application**
 2. Click the **New** button
-
-📸 *[Screenshot Placeholder — Remote Java Application Selected]*
-
+   
+![Screenshot Placeholder — Remote Java Application Selected](images/2.CreateRemoteJAppConf.png)
 ---
 
 ## Step 3 — Configure the Connection
@@ -116,7 +114,7 @@ Debug As → Debug Configurations…
 | Host            | 127.0.0.1                |
 | Port            | 5005                     |
 
-📸 *[Screenshot Placeholder — Connect Tab Configuration]*
+![Screenshot Placeholder — Connect Tab Configuration](images/3.ConnectionConf.png)
 
 Click **Apply**.
 
@@ -134,8 +132,6 @@ If not:
 * Choose **Java Project**
 * Select your project
 
-📸 *[Screenshot Placeholder — Source Tab Configured]*
-
 ---
 
 # Part 3 — Attach the Debugger
@@ -147,8 +143,6 @@ If successful:
 * Eclipse switches to the **Debug Perspective**
 * Threads appear in the Debug view
 * Breakpoints activate
-
-📸 *[Screenshot Placeholder — Debug Perspective with Threads Visible]*
 
 If you get a connection error:
 
@@ -169,8 +163,6 @@ If successful:
 * Eclipse pauses execution.
 * You can step through the code.
 * Variables appear in the Variables view.
-
-📸 *[Screenshot Placeholder — Breakpoint Hit]*
 
 ---
 
@@ -194,7 +186,7 @@ Ensure:
 * ❌ Show error when not supported (optional)
 * ❌ Show error when obsolete methods remain (optional)
 
-📸 *[Screenshot Placeholder — Hot Code Replace Preferences]*
+![Screenshot Placeholder — Hot Code Replace Preferences](images/4.HotCodeReplacement.png)
 
 ---
 
@@ -289,7 +281,3 @@ Your Eclipse IDE is attached to a running JVM via JDWP, and you can:
 
 ---
 
-End of guide.
-
-```
-```
