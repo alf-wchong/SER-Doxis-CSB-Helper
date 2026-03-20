@@ -21,7 +21,7 @@ For your convenience, use this [checklist](./Checklist.md) to guide you through 
 
 #### 2. Select All Relevant Objects
 
-This is critical.
+_This is critical._
 
 Access rights are **attached to objects**, not transported independently.
 So you must include:
@@ -70,7 +70,7 @@ Otherwise, rights may not map correctly during import.
 
 #### 5. Configure Export Options for Access Rights
 
-This is the most important configuration step.
+_This is the most important configuration step._
 
 ##### Default behavior:
 
