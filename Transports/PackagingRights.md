@@ -60,22 +60,22 @@ Here is the step-by-step way to make sure the needed rights are actually package
 8. Decide whether target permissions should be **merged** or **replaced**.
 
    > “Overwrite permissions: If this option is selected, access rights in the target organization are fully replaced by access rights from the transport package. Otherwise, only missing entries are added.”
-   > (UG_Doxis_CSB_14.3.0.pdf, p. 1144)
+   > ([UG_Doxis_CSB_14.3.0.pdf, p. 1144](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.0/en-us/UG_Doxis_CSB/WEBHELP/APP_CSB/topics/tsk_UserManual_Orgaadmin_Transport_ImportSelective.html))
 
 9. Run **Test run** before the real import.
 
    > “Click Test run if you want to simulate the import … This enables you to solve any problems before the actual import.”
-   > (UG_Doxis_CSB_14.3.0.pdf, p. 1144)
+   > ([UG_Doxis_CSB_14.3.0.pdf, p. 1144](https://services.sergroup.com/documentation/#/view/PD_CSB_Short/14.3.0/en-us/UG_Doxis_CSB/WEBHELP/APP_CSB/topics/tsk_UserManual_Orgaadmin_Transport_ImportSelective.html))
 
 10. Make sure the operator has the required admin rights.
 
 > “ADM - Export transport package — The right to export transport packages…”
 > “ADM - Import transport package — The right to import transport packages…”
-> (UG_Doxis_cubeDesigner_14.4.0.pdf, p. 1693)
+> ([UG_Doxis_cubeDesigner_14.4.0.pdf, p. 1693](https://services.sergroup.com/documentation/?#/view/PD_cubeDesigner/14.5.0/en-us/UG_Doxis_cubeDesigner/WEBHELP/APP_cubeDesigner/topics/ref_Rights_DMSOrganization.html))
 
 The shortest practical checklist is: include all relevant objects and dependencies, enable **Export user-specific permissions** when needed, enable **Export/Import access rules** when needed, keep **Import rights and ownerships** on, choose the correct **name vs. UUID** matching, and set **Overwrite permissions** deliberately.
 
 If you want all transportable rights across the whole organization rather than a selective package, the docs point to **complete transport** instead:
 
 > “the transportable data of an organization is completely exported”
-> (UG_Doxis_CSB_14.3.0.pdf, p. 1119)
+> ([UG_Doxis_CSB_14.3.0.pdf, p. 1119](https://services.sergroup.com/documentation/api/documentations/2/485/1482/WEBHELP/APP_CSB/topics/con_UserManual_Orgaadmin_Transport.html#con_ah1401986__ah1187367))
