@@ -253,4 +253,4 @@ Use **complete transport** instead of selective if:
 * You want minimal configuration risk
 
 ---
-[^1]: [PackagingRights](PackagingRights.md)
+[^1]: [PackagingRights](./PackagingRights.md)
