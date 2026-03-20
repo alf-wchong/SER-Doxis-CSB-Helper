@@ -2,6 +2,8 @@
 
 Here’s a clean, practical walkthrough you can follow to **reliably transport access rights (not access rules)** from one Doxis environment to another using transport packages[^1].
 
+For your convenience, use this [checklist](./Checklist.md) to guide you through the process. 
+
 ---
 
 ## Step-by-Step: Transporting Access Rights Between Systems
