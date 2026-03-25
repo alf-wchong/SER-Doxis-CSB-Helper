@@ -51,7 +51,7 @@ flowchart TB
 
 ## 1. The `secured-v-ca` Sidecar (Option C)
 
-Add this service to your `docker-compose.yml`. We expose port `9000` so your Windows apps can reach the CA for automated enrollment.
+Add this service to `docker-compose.yml` [^dockercompose]. Expose port `9000` so the SecuredViewer Windows app can reach the CA for automated enrollment.
 
 ```yaml
   secured-v-ca:
@@ -73,7 +73,7 @@ Add this service to your `docker-compose.yml`. We expose port `9000` so your Win
 
 ## 2. NGINX Configuration for mTLS
 
-We will create a specific subdomain for the SecuredViewer Windows app. This allows NGINX to demand a certificate **only** for that subdomain.
+Create a specific subdomain for the SecuredViewer Windows app. This allows NGINX to demand a certificate **only** for that subdomain.
 
 ### `nginx/conf.d/secured-webcube.conf`
 ```nginx
@@ -111,7 +111,7 @@ server {
 ## 3. Operational Commands (The "Action" Section)
 
 ### A. Initialize the CA
-Run this once to generate your Root and Intermediate keys.
+Run this once to generate the Root and Intermediate keys.
 ```bash
 docker compose run --rm secured-v-ca step ca init \
     --name "Doxis-Internal-CA" \
@@ -121,18 +121,18 @@ docker compose run --rm secured-v-ca step ca init \
 ```
 
 ### B. Link CA to NGINX
-NGINX needs to know which "Root" to trust. Copy the root cert from the CA volume to your NGINX config folder.
+NGINX needs to know which "Root" to trust. Copy the root cert from the CA volume to the NGINX config folder.
 ```bash
 cp ./step/certs/root_ca.crt ./nginx/certs/root_ca.crt
 docker compose restart nginx
 ```
 
 ### C. Automated Enrollment (20,000 Users)
-Instead of manual files, your SecuredViewer Windows app should use the **ACME provisioner**. Enable it on the CA:
+Instead of manual files, the SecuredViewer Windows app should use the **ACME provisioner**. Enable it on the CA:
 ```bash
 docker exec -it secured-v-ca step ca provisioner add acme --type ACME
 ```
-**SecuredViewer Windows App Logic:** Your app (using a library like `Certes` for .NET or `win-acme`) points to `https://ca.dx4localdev.duckdns.org:9000/acme/acme/directory`. It will automatically fetch a certificate, install it in the Windows Store, and use it for all future requests to `secured-webcube`.
+**SecuredViewer Windows App Logic:** The app (using a library like `Certes` for .NET or `win-acme`) points to `https://ca.dx4localdev.duckdns.org:9000/acme/acme/directory`. It will automatically fetch a certificate, install it in the Windows Store, and use it for all future requests to `secured-webcube`.
 
 ---
 
@@ -144,3 +144,4 @@ docker exec -it secured-v-ca step ca provisioner add acme --type ACME
 | **Document viewing** | `secured-webcube...` | **mTLS (Handshake)** | Doxis Login |
 
 ---
+[^dockercompose]: [docker-compose.yml](docker-compose.yml)
