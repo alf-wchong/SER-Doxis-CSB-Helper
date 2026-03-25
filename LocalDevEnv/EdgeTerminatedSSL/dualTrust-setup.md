@@ -2,7 +2,7 @@
 By using a "dual-trust" approach, users get the best of both worlds: a seamless browser experience for regular webCube (via Let's Encrypt) and a cryptographically gated "VIP entrance" for the SecuredViewer Windows application (via `secured-v-ca`).
 
 ## Overview
-This document describes a production-like Doxis deployment with a **Zero-Trust** layer for the SecuredViewer Windows application. 
+This document describes a production-like Doxis deployment with a **Zero-Trust** layer for the SecuredViewer Windows application. This builds on the [SSL protected single-node Docker Deployment](DockerComposeModifications.md) of a typical Doxis stack, it would be a very good idea to have a look at it first.
 
 * **Public UI:** Standard HTTPS (Let's Encrypt) for browsers.
 * **App API:** Mutual TLS (mTLS) via `secured-v-ca` for the Windows client.
