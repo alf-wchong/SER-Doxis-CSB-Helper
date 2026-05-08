@@ -37,4 +37,79 @@ Record all network requests during a failed login attempt.
 
 10. Right-click anywhere in the Network tab.
 11. Click **"Save all as HAR with content"**.
-12. Save the file as:
+12. Save the file as: `failed-login.har`
+
+
+---
+
+## Step 2 – Capture Additional Context
+
+Please provide the following details along with the HAR file:
+
+- Username used for login
+- Exact timestamp of login attempt (include timezone)
+- Browser type and version (e.g., Chrome 122, Edge 120)
+- Whether VPN was active (Yes/No)
+- Machine type:
+- Domain-joined: Yes/No
+- Description of what happened:
+- Example: “Login succeeds briefly, then redirects back to login”
+
+---
+
+## Step 3 – Capture a Screen Recording (Optional but Recommended)
+
+1. Start screen recording before login.
+2. Perform the login attempt.
+3. Stop recording after failure occurs.
+4. Save as: `failed-login.mp4`
+
+
+---
+
+## Step 4 – Repeat in Incognito (Control Test)
+
+Repeat the same steps in **Incognito / InPrivate mode**:
+
+- Save HAR as: `working-login-incognito.har`
+
+This helps compare working vs failing scenarios.
+
+---
+
+## Step 5 – Provide Files
+
+Please share the following:
+
+- failed-login.har
+- working-login-incognito.har (if available)
+- failed-login.mp4 (if recorded)
+
+---
+
+## Step 6 – Internal Correlation (Doxis Team)
+
+Once received, we will:
+
+- Match timestamps with:
+- CSB logs
+- WebCube logs
+- Identify:
+- SAML response processing
+- Session creation event
+- Exact request triggering session invalidation
+
+---
+
+## Expected Outcome
+
+This step will determine:
+
+- Whether the failure occurs:
+- During SAML exchange
+- Immediately after session creation
+- During subsequent application requests
+
+This is required before proceeding to deeper SAML and session analysis.
+
+---  
