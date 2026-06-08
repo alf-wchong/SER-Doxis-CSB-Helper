@@ -15,6 +15,8 @@ Estimated AWS cost:
 
 * Monthly: approximately **$402.36/month** 
 
+[Estimator Calculator worksheet](https://calculator.aws/#/estimate?id=76919a7c64871cd9807f9523da9dbbd7b9e31429).
+
 ---
 
 # Doxis Components
