@@ -15,7 +15,7 @@ Estimated AWS cost:
 
 * Monthly: approximately **$402.36/month** 
 
-[Estimator Calculator worksheet](https://calculator.aws/#/estimate?id=76919a7c64871cd9807f9523da9dbbd7b9e31429).
+[Estimator Calculator worksheet](https://calculator.aws/#/estimate?id=3e639db52701deb9c8c3f6a8cb2fa3e61b252724).
 
 ---
 
@@ -156,8 +156,9 @@ If demonstration reliability becomes important, move from Spot to On-Demand.
 
 ---
 
-Amazon Elastic Container Registry (ECR)
-Purpose
+# Amazon Elastic Container Registry (ECR)
+
+## Purpose
 
 Amazon Elastic Container Registry (ECR) serves as the private container image repository for all Doxis container images deployed into the EKS cluster.
 
@@ -165,19 +166,21 @@ ECR is required because the official Doxis container registry is not publicly ac
 
 Images stored in ECR include:
 
-Doxis CSB
-Doxis Admin
-Doxis Storage
-Doxis Agent
-Doxis Fulltext
-Doxis FIPS
-Doxis Business Studio
-Doxis WebCube
-Doxis MobileCube
-Usage
+* Doxis CSB
+* Doxis Admin
+* Doxis Storage
+* Doxis Agent
+* Doxis Fulltext
+* Doxis FIPS
+* Doxis Business Studio
+* Doxis WebCube
+* Doxis MobileCube
+
+## Usage
 
 Container deployment workflow:
 
+```text
 Doxis Registry
       ↓
 Image Synchronization
@@ -187,19 +190,23 @@ Amazon ECR
 Amazon EKS Worker Nodes
       ↓
 Doxis Pods
+```
 
 Kubernetes worker nodes pull container images directly from ECR during:
 
-Initial deployment
-Pod creation
-Node replacement
-Application upgrades
-Scheduled restarts
-Recommended Configuration
-Repository Structure
+* Initial deployment
+* Pod creation
+* Node replacement
+* Application upgrades
+* Scheduled restarts
+
+## Recommended Configuration
+
+### Repository Structure
 
 A separate ECR repository should be maintained for each Doxis component:
 
+```text
 doxis-csb
 doxis-admin
 doxis-storage
@@ -209,36 +216,45 @@ doxis-fips
 doxis-businessstudio
 doxis-webcube
 doxis-mobilecube
-Image Retention
+```
+
+### Image Retention
 
 Recommended lifecycle policy:
 
-Retain latest 5–10 versions
-Automatically remove older images
-Preserve tagged release versions
-Authentication
+* Retain latest 5–10 versions
+* Automatically remove older images
+* Preserve tagged release versions
+
+### Authentication
 
 EKS worker nodes should access ECR using IAM roles attached to the worker node instances.
 
 No static credentials should be stored inside Kubernetes.
 
-Pros
-Native AWS integration
-High availability
-Private image storage
-Simplified authentication through IAM
-Eliminates dependency on external registries during runtime
-Reduces deployment risk caused by third-party registry outages
-Supports image vulnerability scanning
-Cons
-Additional image synchronization process required
-Slight increase in storage costs
-Requires management of repository lifecycle policies
-Assessment
+## Pros
+
+* Native AWS integration
+* High availability
+* Private image storage
+* Simplified authentication through IAM
+* Eliminates dependency on external registries during runtime
+* Reduces deployment risk caused by third-party registry outages
+* Supports image vulnerability scanning
+
+## Cons
+
+* Additional image synchronization process required
+* Slight increase in storage costs
+* Requires management of repository lifecycle policies
+
+## Assessment
 
 Strongly recommended.
 
 ECR should be considered a mandatory component of the AWS reference architecture whenever Doxis container images are not directly accessible from the target AWS environment.
+
+For this lab environment, ECR provides a secure and operationally simple method of distributing Doxis container images to the EKS worker nodes.
 
 ---
 
