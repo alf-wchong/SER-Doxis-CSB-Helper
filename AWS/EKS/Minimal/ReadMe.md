@@ -156,6 +156,92 @@ If demonstration reliability becomes important, move from Spot to On-Demand.
 
 ---
 
+Amazon Elastic Container Registry (ECR)
+Purpose
+
+Amazon Elastic Container Registry (ECR) serves as the private container image repository for all Doxis container images deployed into the EKS cluster.
+
+ECR is required because the official Doxis container registry is not publicly accessible from customer AWS environments. Doxis images must therefore be synchronized into a customer-controlled ECR repository prior to deployment.
+
+Images stored in ECR include:
+
+Doxis CSB
+Doxis Admin
+Doxis Storage
+Doxis Agent
+Doxis Fulltext
+Doxis FIPS
+Doxis Business Studio
+Doxis WebCube
+Doxis MobileCube
+Usage
+
+Container deployment workflow:
+
+Doxis Registry
+      ↓
+Image Synchronization
+      ↓
+Amazon ECR
+      ↓
+Amazon EKS Worker Nodes
+      ↓
+Doxis Pods
+
+Kubernetes worker nodes pull container images directly from ECR during:
+
+Initial deployment
+Pod creation
+Node replacement
+Application upgrades
+Scheduled restarts
+Recommended Configuration
+Repository Structure
+
+A separate ECR repository should be maintained for each Doxis component:
+
+doxis-csb
+doxis-admin
+doxis-storage
+doxis-agent
+doxis-fulltext
+doxis-fips
+doxis-businessstudio
+doxis-webcube
+doxis-mobilecube
+Image Retention
+
+Recommended lifecycle policy:
+
+Retain latest 5–10 versions
+Automatically remove older images
+Preserve tagged release versions
+Authentication
+
+EKS worker nodes should access ECR using IAM roles attached to the worker node instances.
+
+No static credentials should be stored inside Kubernetes.
+
+Pros
+Native AWS integration
+High availability
+Private image storage
+Simplified authentication through IAM
+Eliminates dependency on external registries during runtime
+Reduces deployment risk caused by third-party registry outages
+Supports image vulnerability scanning
+Cons
+Additional image synchronization process required
+Slight increase in storage costs
+Requires management of repository lifecycle policies
+Assessment
+
+Strongly recommended.
+
+ECR should be considered a mandatory component of the AWS reference architecture whenever Doxis container images are not directly accessible from the target AWS environment.
+
+---
+
 # Windows EC2 Instance
 
 ## Purpose
