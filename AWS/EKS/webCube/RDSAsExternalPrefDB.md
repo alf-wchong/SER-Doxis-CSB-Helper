@@ -310,7 +310,7 @@ For real deployments, do not commit `webcube.xml` with production credentials. S
 
 ## Summary
 
-For a secure AWS RDS PostgreSQL setup, configure webCube through Tomcat JNDI rather than embedding credentials in Helm chart database values. The practical sequence is:
+For a secure AWS RDS PostgreSQL setup, configure webCube through Tomcat JNDI. The practical sequence is:
 
 1. Define the PostgreSQL datasource in `webcube.xml`.
 2. Store `webcube.xml` as a Kubernetes Secret.
@@ -319,7 +319,7 @@ For a secure AWS RDS PostgreSQL setup, configure webCube through Tomcat JNDI rat
 5. Set webCube’s **JNDI name for database with user settings** to `jdbc/webCube`.
 6. Restart the pod and validate persistence.
 
-That gives webCube a persistent PostgreSQL-backed user-settings database while keeping database credentials out of plain-text Helm values.
+That gives webCube a persistent PostgreSQL-backed server profile and user-settings database.
 
 ---
 
